@@ -27,6 +27,8 @@ namespace Lab1
         public int darkBright;
         public float contrast;
         public int r;
+        public int rG;
+        public int hist;
 
         public MainWindow()
         {
@@ -34,6 +36,8 @@ namespace Lab1
             darkBright = 120;
             contrast = 120;
             r = 3;
+            rG = 3;
+            hist = 3;
         }
 
         private void Load_Button(object sender, RoutedEventArgs e)
@@ -107,6 +111,21 @@ namespace Lab1
             });
         }
 
+        public async Task RunLocalBin()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.LocalBin(originalBitmap, rG);
+            });
+        }
+
+        public async Task RunHist()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Hist(originalBitmap, hist);
+            });
+        }
 
         private async void DoInverse_Button(object sender, RoutedEventArgs e)
         {
@@ -175,11 +194,53 @@ namespace Lab1
             {
                 if (r < 0)
                 {
-                    MessageBox.Show("Incorrect contrast!");
+                    MessageBox.Show("Incorrect local binarization level!");
                     return;
                 }
             }
             await RunGlobBin();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
+        private async void LocalBin_Button(object sender, RoutedEventArgs e)
+        {
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            if (int.TryParse(rg_txt.Text, out rG))
+            {
+                if (rG < 0)
+                {
+                    MessageBox.Show("Incorrect global binarization level!");
+                    return;
+                }
+            }
+            await RunLocalBin();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
+        private async void Histogram_Button(object sender, RoutedEventArgs e)
+        {
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            if (int.TryParse(hist_txt.Text, out hist))
+            {
+                if (hist < 0)
+                {
+                    MessageBox.Show("Incorrect local binarization level!");
+                    return;
+                }
+            }
+            await RunHist();
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
         }

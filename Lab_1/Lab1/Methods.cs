@@ -108,6 +108,98 @@ namespace Lab1
             return tempPict;
         }
 
+        public static Bitmap LocalBin(Bitmap btm, int r)
+        {
+            Bitmap pict = new Bitmap(btm);
+            pict = GrayScale(pict);
+            Bitmap tempPict = new Bitmap(btm);
+            int globT = tempPict.GetPixel(0, 0).R;
+            for (int x = 0; x < pict.Size.Width; x++)
+            {
+                for (int y = 0; y < pict.Size.Height; y++)
+                {
+                    System.Drawing.Color newColor, oldColour;
+                    oldColour = tempPict.GetPixel(x, y);
+                    Tuple<int, int> minMax = GetMinMax(r, x, y, pict);
+                    int T = 0;
+                    if (Math.Abs(minMax.Item2 - minMax.Item1) < 10)
+                    {
+                        T = globT;
+                    }
+                    else
+                    {
+                        T = (minMax.Item1 + minMax.Item2) / 2;
+                        globT = (globT + T) / 2;
+                    }
+                    int R = oldColour.R <= T ? 0 : 255;
+                    newColor = System.Drawing.Color.FromArgb(R, R, R);
+                    pict.SetPixel(x, y, newColor);
+                }
+            }
+
+            return pict;
+        }
+
+        private static Tuple<int, int> GetMinMax(int neighbours, int x, int y, Bitmap bmp)
+        {
+            Tuple<int, int> answer = new Tuple<int, int>(0, 0);
+            int min = 255, max = -255;
+
+            for (int i = -neighbours; i < neighbours; i++)
+            {
+                for (int j = -neighbours; j < neighbours; j++)
+                {
+                    if (x + i >= 0 && x + i < bmp.Width && y + j >= 0 && y + j < bmp.Height)
+                    {
+                        System.Drawing.Color pixel = bmp.GetPixel(x + i, y + j);
+                        if (pixel.R < min)
+                        {
+                            min = pixel.R;
+                        }
+                        if (pixel.R > max)
+                        {
+                            max = pixel.R;
+                        }
+                    }
+                }
+            }
+            return new Tuple<int, int>(min, max);
+
+        }
+
+        public static Bitmap Hist(Bitmap btm, int r)
+        {
+            Bitmap pict = new Bitmap(btm);
+            pict = GrayScale(pict);
+            pict = LocalBin(pict, r);
+            int[] VecX = new int[btm.Width];
+            int[] VecY = new int[btm.Height];
+            for (int i = 0; i < (btm.Width > btm.Height ? btm.Width : btm.Height); i++)
+            {
+                if (i < btm.Width)
+                {
+                    VecX[i] = 0;
+                }
+                if (i < btm.Height)
+                {
+                    VecY[i] = 0;
+                }
+            }
+            for (int x = 0; x < pict.Size.Width; x++)
+            {
+                for (int y = 0; y < pict.Size.Height; y++)
+                {
+                    if(pict.GetPixel(x, y).R == 255)
+                    {
+                        VecX[x]++;
+                        VecY[y]++;
+                    }
+                }
+            }
+
+            return pict;
+        }
+
         private static int FromInterval(int col)
         {
             if (col > 255)
