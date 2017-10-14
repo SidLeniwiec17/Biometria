@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SkalaSzarosci.Properties
+namespace Lab1.Properties
 {
 
 

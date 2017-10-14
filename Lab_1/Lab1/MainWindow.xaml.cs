@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SkalaSzarosci
+namespace Lab1
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -129,9 +129,9 @@ namespace SkalaSzarosci
                 return;
             }
             BlakWait.Visibility = Visibility.Visible;
-            if(int.TryParse(dark.Text, out darkBright))
+            if (int.TryParse(dark.Text, out darkBright))
             {
-                if(darkBright<=-255 || darkBright >= 255)
+                if (darkBright <= -255 || darkBright >= 255)
                 {
                     MessageBox.Show("Incorrect darkBright!");
                     return;
@@ -140,7 +140,7 @@ namespace SkalaSzarosci
             await RunDarkBright();
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
-        }        
+        }
 
         private async void Contrast_Button(object sender, RoutedEventArgs e)
         {

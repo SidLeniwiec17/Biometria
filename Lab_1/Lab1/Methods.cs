@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
-namespace SkalaSzarosci
+namespace Lab1
 {
     public class Methods
     {
@@ -99,8 +99,8 @@ namespace SkalaSzarosci
                 {
                     System.Drawing.Color oldColour, newColor;
                     oldColour = tempPict.GetPixel(x, y);
-                    int R = oldColour.R <= r ? 0 : 255 ;
-                    newColor = System.Drawing.Color.FromArgb(R,R,R);
+                    int R = oldColour.R <= r ? 0 : 255;
+                    newColor = System.Drawing.Color.FromArgb(R, R, R);
                     tempPict.SetPixel(x, y, newColor);
                 }
             }
