@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Lab1
@@ -167,11 +168,11 @@ namespace Lab1
 
         }
 
-        public static Bitmap Hist(Bitmap btm, int r)
+        public static Tuple<Bitmap, PointCollection, PointCollection> Hist(Bitmap btm, int r)
         {
             Bitmap pict = new Bitmap(btm);
             pict = GrayScale(pict);
-            pict = LocalBin(pict, r);
+            pict = GlobBin(pict, r);
             int[] VecX = new int[btm.Width];
             int[] VecY = new int[btm.Height];
             for (int i = 0; i < (btm.Width > btm.Height ? btm.Width : btm.Height); i++)
@@ -189,7 +190,7 @@ namespace Lab1
             {
                 for (int y = 0; y < pict.Size.Height; y++)
                 {
-                    if(pict.GetPixel(x, y).R == 255)
+                    if (pict.GetPixel(x, y).R == 255)
                     {
                         VecX[x]++;
                         VecY[y]++;
@@ -197,7 +198,24 @@ namespace Lab1
                 }
             }
 
-            return pict;
+            PointCollection pointX = CreateHistogramPoints(VecX);
+            PointCollection pointY = CreateHistogramPoints(VecY);
+            Tuple<Bitmap, PointCollection, PointCollection> tuple = new Tuple<Bitmap, PointCollection, PointCollection>(pict, pointX, pointY);
+            return tuple;
+        }
+
+        private static PointCollection CreateHistogramPoints(int[] values)
+        {
+            int max = values.Max();
+
+            PointCollection points = new PointCollection();
+            points.Add(new System.Windows.Point(0, max));
+            for (int i = 0; i < values.Length; i++)
+            {
+                points.Add(new System.Windows.Point(i, max - values[i]));
+            }
+            points.Add(new System.Windows.Point(values.Length - 1, max));
+            return points;
         }
 
         private static int FromInterval(int col)

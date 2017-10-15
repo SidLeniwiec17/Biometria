@@ -29,6 +29,8 @@ namespace Lab1
         public int r;
         public int rG;
         public int hist;
+        public PointCollection pointsX;
+        public PointCollection pointsY;
 
         public MainWindow()
         {
@@ -38,6 +40,8 @@ namespace Lab1
             r = 3;
             rG = 3;
             hist = 3;
+            pointsX = new PointCollection();
+            pointsY = new PointCollection();
         }
 
         private void Load_Button(object sender, RoutedEventArgs e)
@@ -123,7 +127,11 @@ namespace Lab1
         {
             await Task.Run(() =>
             {
-                newBmp = Methods.Hist(originalBitmap, hist);
+                var answ = Methods.Hist(originalBitmap, hist);
+
+                newBmp = answ.Item1;
+                pointsX = new PointCollection(answ.Item2);
+                pointsY = new PointCollection(answ.Item3);
             });
         }
 
@@ -240,7 +248,16 @@ namespace Lab1
                     return;
                 }
             }
+
             await RunHist();
+
+            if (pointsX.Count > 0 && pointsY.Count > 0)
+            {
+                HistogramWindow histogramX = new HistogramWindow(pointsX, "X");
+                HistogramWindow histogramY = new HistogramWindow(pointsY, "Y");
+                histogramX.Show();
+                histogramY.Show();
+            }
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
         }
