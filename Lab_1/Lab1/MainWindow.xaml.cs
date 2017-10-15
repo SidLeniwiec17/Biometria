@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -31,6 +32,8 @@ namespace Lab1
         public int hist;
         public PointCollection pointsX;
         public PointCollection pointsY;
+        public ConcurrentBag<System.Windows.Point> pointsBagX;
+        public ConcurrentBag<System.Windows.Point> pointsBagY;
 
         public MainWindow()
         {
@@ -42,6 +45,8 @@ namespace Lab1
             hist = 3;
             pointsX = new PointCollection();
             pointsY = new PointCollection();
+            pointsBagX = new ConcurrentBag<System.Windows.Point>();
+            pointsBagY = new ConcurrentBag<System.Windows.Point>();
         }
 
         private void Load_Button(object sender, RoutedEventArgs e)
@@ -128,10 +133,13 @@ namespace Lab1
             await Task.Run(() =>
             {
                 var answ = Methods.Hist(originalBitmap, hist);
-
                 newBmp = answ.Item1;
-                pointsX = new PointCollection(answ.Item2);
-                pointsY = new PointCollection(answ.Item3);
+
+                foreach (var x in answ.Item2)
+                    pointsBagX.Add(x);
+
+                foreach (var x in answ.Item3)
+                    pointsBagY.Add(x);
             });
         }
 
@@ -249,15 +257,27 @@ namespace Lab1
                 }
             }
 
+            pointsX = new PointCollection();
+            pointsY = new PointCollection();
+            pointsBagX = new ConcurrentBag<System.Windows.Point>();
+            pointsBagY = new ConcurrentBag<System.Windows.Point>();
+
             await RunHist();
+
+            foreach (var x in pointsBagX)
+                pointsX.Add(x);
+
+            foreach (var x in pointsBagY)
+                pointsY.Add(x);
 
             if (pointsX.Count > 0 && pointsY.Count > 0)
             {
-                HistogramWindow histogramX = new HistogramWindow(pointsX, "X");
-                HistogramWindow histogramY = new HistogramWindow(pointsY, "Y");
+                HistogramWindow histogramX = new HistogramWindow(pointsX, "X", newBmp.Width, newBmp.Height);
+                HistogramWindow histogramY = new HistogramWindow(pointsY, "Y", newBmp.Width, newBmp.Height);
                 histogramX.Show();
                 histogramY.Show();
             }
+
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
         }
