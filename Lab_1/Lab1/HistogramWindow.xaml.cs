@@ -21,14 +21,15 @@ namespace Lab1
     {
         public PointCollection Points;
         public string Name;
-
-        public HistogramWindow(PointCollection points, string name)
+        public HistogramWindow(PointCollection points, string name, int width, int height)
         {
+            InitializeComponent();
             Points = points;
             Name = name;
-            InitializeComponent();
-            this.Title = Name;
-            histogram.Points = Points;
+            polygon.Points = Points;
+            border.Header = Name;
+            this.Width = width + 20;
+            this.Height = height + 50;
         }
     }
 }

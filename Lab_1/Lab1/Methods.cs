@@ -190,7 +190,7 @@ namespace Lab1
             {
                 for (int y = 0; y < pict.Size.Height; y++)
                 {
-                    if (pict.GetPixel(x, y).R == 255)
+                    if (pict.GetPixel(x, y).R == 0)
                     {
                         VecX[x]++;
                         VecY[y]++;
@@ -198,23 +198,35 @@ namespace Lab1
                 }
             }
 
-            PointCollection pointX = CreateHistogramPoints(VecX);
-            PointCollection pointY = CreateHistogramPoints(VecY);
+            PointCollection pointX = CreateHistogramPoints(VecX, 0);
+            PointCollection pointY = CreateHistogramPoints(VecY, 1);
             Tuple<Bitmap, PointCollection, PointCollection> tuple = new Tuple<Bitmap, PointCollection, PointCollection>(pict, pointX, pointY);
             return tuple;
         }
 
-        private static PointCollection CreateHistogramPoints(int[] values)
+        private static PointCollection CreateHistogramPoints(int[] values, int flag)
         {
             int max = values.Max();
-
             PointCollection points = new PointCollection();
-            points.Add(new System.Windows.Point(0, max));
-            for (int i = 0; i < values.Length; i++)
+
+            if (flag == 0)
             {
-                points.Add(new System.Windows.Point(i, max - values[i]));
+                points.Add(new System.Windows.Point(0, max));
+                for (int i = 0; i < values.Length; i++)
+                {
+                    points.Add(new System.Windows.Point(i, max - values[i]));
+                }
+                points.Add(new System.Windows.Point(values.Length - 1, max));
             }
-            points.Add(new System.Windows.Point(values.Length - 1, max));
+            else
+            {
+                points.Add(new System.Windows.Point(0, 0));
+                for (int i = 0; i < values.Length; i++)
+                {
+                    points.Add(new System.Windows.Point(values[i], i));
+                }
+                points.Add(new System.Windows.Point(0, values.Length - 1));
+            }
             return points;
         }
 
