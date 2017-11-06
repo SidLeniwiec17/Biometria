@@ -204,6 +204,51 @@ namespace Lab1
             return tuple;
         }
 
+        public static Tuple<Bitmap, PointCollection, PointCollection, PointCollection> Projection(Bitmap btm)
+        {
+            Bitmap pict = new Bitmap(btm);
+            int[] VecR = new int[255];
+            int[] VecG = new int[255];
+            int[] VecB = new int[255];
+            for (int i = 0; i < 255; i++)
+            {
+                VecR[i] = 0;
+                VecG[i] = 0;
+                VecB[i] = 0;
+            }
+            for (int x = 0; x < pict.Size.Width; x++)
+            {
+                for (int y = 0; y < pict.Size.Height; y++)
+                {
+                    var pix = pict.GetPixel(x, y);
+                    VecR[pix.R]++;
+                    VecG[pix.G]++;
+                    VecB[pix.B]++;
+                }
+            }
+
+            PointCollection pointR = CreateProjectionPoints(VecR);
+            PointCollection pointG = CreateProjectionPoints(VecG);
+            PointCollection pointB = CreateProjectionPoints(VecB);
+            Tuple<Bitmap, PointCollection, PointCollection, PointCollection> tuple = new Tuple<Bitmap, PointCollection, PointCollection, PointCollection>(pict, pointR, pointG, pointB);
+            return tuple;
+        }
+
+        private static PointCollection CreateProjectionPoints(int[] values)
+        {
+            int max = values.Max();
+            PointCollection points = new PointCollection();
+
+            points.Add(new System.Windows.Point(0, max));
+            for (int i = 0; i < values.Length; i++)
+            {
+                points.Add(new System.Windows.Point(i, max - values[i]));
+            }
+            points.Add(new System.Windows.Point(values.Length - 1, max));
+
+            return points;
+        }
+
         private static PointCollection CreateHistogramPoints(int[] values, int flag)
         {
             int max = values.Max();

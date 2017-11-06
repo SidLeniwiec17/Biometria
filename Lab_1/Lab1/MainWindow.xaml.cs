@@ -34,6 +34,13 @@ namespace Lab1
         public PointCollection pointsY;
         public ConcurrentBag<System.Windows.Point> pointsBagX;
         public ConcurrentBag<System.Windows.Point> pointsBagY;
+        public PointCollection pointsR;
+        public PointCollection pointsG;
+        public PointCollection pointsB;
+        public ConcurrentBag<System.Windows.Point> pointsBagR;
+        public ConcurrentBag<System.Windows.Point> pointsBagG;
+        public ConcurrentBag<System.Windows.Point> pointsBagB;
+
 
         public MainWindow()
         {
@@ -51,6 +58,7 @@ namespace Lab1
 
         private void Load_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             OpenFileDialog dialog = new OpenFileDialog();
 
             dialog.Title = "pic";
@@ -69,6 +77,7 @@ namespace Lab1
 
         private async void DoGray_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -78,7 +87,6 @@ namespace Lab1
             await RunGrayScale();
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
-
         }
 
         public async Task RunGrayScale()
@@ -143,8 +151,27 @@ namespace Lab1
             });
         }
 
+        public async Task RunProjection()
+        {
+            await Task.Run(() =>
+            {
+                var answ = Methods.Projection(originalBitmap);
+                newBmp = answ.Item1;
+
+                foreach (var x in answ.Item2)
+                    pointsBagR.Add(x);
+
+                foreach (var x in answ.Item3)
+                    pointsBagG.Add(x);
+
+                foreach (var x in answ.Item4)
+                    pointsBagB.Add(x);
+            });
+        }        
+
         private async void DoInverse_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -158,6 +185,7 @@ namespace Lab1
 
         private async void DarkBright_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -179,6 +207,7 @@ namespace Lab1
 
         private async void Contrast_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -200,6 +229,7 @@ namespace Lab1
 
         private async void GlobalBin_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -221,6 +251,7 @@ namespace Lab1
 
         private async void LocalBin_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -242,6 +273,7 @@ namespace Lab1
 
         private async void Histogram_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
             if (newBmp == null)
             {
                 MessageBox.Show("Load image!");
@@ -272,14 +304,89 @@ namespace Lab1
 
             if (pointsX.Count > 0 && pointsY.Count > 0)
             {
-                HistogramWindow histogramX = new HistogramWindow(pointsX, "X", newBmp.Width, newBmp.Height);
-                HistogramWindow histogramY = new HistogramWindow(pointsY, "Y", newBmp.Width, newBmp.Height);
-                histogramX.Show();
-                histogramY.Show();
+                borderX.Visibility = Visibility.Visible;
+                borderX.Height = newBmp.Height;
+                polygonX.Points = pointsX;
+                borderX.Header = "X";
+                borderY.Visibility = Visibility.Visible;
+                borderY.Height = newBmp.Height;
+                polygonY.Points = pointsY;
+                borderY.Header = "Y";
+                this.Width = newBmp.Width * 2 + 200;
             }
 
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
         }
+
+        private void HideHistogram()
+        {
+            borderX.Visibility = Visibility.Collapsed;
+            borderY.Visibility = Visibility.Collapsed;
+            borderZ.Visibility = Visibility.Collapsed;
+            polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0));
+            polygonY.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0));
+            Brow.Height = GridLength.Auto;
+            if (newBmp != null)
+            {
+                this.Width = newBmp.Width + 220;
+            }
+        }
+
+        private async void DoProjection_Button(object sender, RoutedEventArgs e)
+        {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+
+            pointsR = new PointCollection();
+            pointsG = new PointCollection();
+            pointsB = new PointCollection();
+            pointsBagR = new ConcurrentBag<System.Windows.Point>();
+            pointsBagG = new ConcurrentBag<System.Windows.Point>();
+            pointsBagB = new ConcurrentBag<System.Windows.Point>();
+
+            await RunProjection();
+
+            foreach (var x in pointsBagR)
+                pointsR.Add(x);
+
+            foreach (var x in pointsBagG)
+                pointsG.Add(x);
+
+            foreach (var x in pointsBagB)
+                pointsB.Add(x);
+
+
+            if (pointsR.Count > 0 && pointsG.Count > 0 && pointsB.Count > 0)
+            {
+                Brow.Height = Rrow.Height;
+                borderX.Visibility = Visibility.Visible;
+                borderX.Height = newBmp.Height;
+                polygonX.Points = pointsR;
+                borderX.Header = "R";
+                polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255,0,0));
+                borderY.Visibility = Visibility.Visible;
+                borderY.Height = newBmp.Height;
+                polygonY.Points = pointsG;
+                polygonY.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 255, 0));
+                borderY.Header = "G";
+                borderZ.Visibility = Visibility.Visible;
+                borderZ.Height = newBmp.Height;
+                polygonZ.Points = pointsB;
+                polygonZ.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 255));
+                borderZ.Header = "B";
+                this.Width = newBmp.Width + 280 + 200;
+            }
+
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
     }
 }
+
