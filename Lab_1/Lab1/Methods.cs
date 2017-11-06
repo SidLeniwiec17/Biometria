@@ -206,8 +206,7 @@ namespace Lab1
 
         public static Bitmap Roberts(Bitmap btm)
         {
-            double[,] wages = new double[2, 2] { { 1, -1 }, { 0, 0 } };
-            Bitmap returned = EdgeDetection(btm, wages);
+            Bitmap returned = EdgeDetection(btm);
             return returned;
         }
 
@@ -244,7 +243,7 @@ namespace Lab1
             return tempPict;
         }
 
-        public static Bitmap EdgeDetection(Bitmap btm, double[,] wages)
+        public static Bitmap EdgeDetection(Bitmap btm)
         {
             Bitmap tempPict = new Bitmap(btm);
 
@@ -252,26 +251,23 @@ namespace Lab1
             {
                 for (int y = 0; y < btm.Height; y++)
                 {
-                    double sumR = 0.0;
-                    double sumG = 0.0;
-                    double sumB = 0.0;
-                    double dividor = 0.0;
-                    for (int x2 = 0; x2 < 2; x2++)
+                    if (x + 1 >= 0 && y + 1 >= 0 && x + 1 < btm.Width && y + 1 < btm.Height)
                     {
-                        for (int y2 = 0; y2 < 2; y2++)
-                        {
-                            if (x + x2 >= 0 && y + y2 >= 0 && x + x2 < btm.Width && y + y2 < btm.Height)
-                            {
-                                double currWage = wages[x2, y2];
-                                sumR += btm.GetPixel(x + x2, y + y2).R * currWage;
-                                sumG += btm.GetPixel(x + x2, y + y2).G * currWage;
-                                sumB += btm.GetPixel(x + x2, y + y2).B * currWage;
-                                dividor += currWage;
-                            }
-                        }
+                        int tmp1R = btm.GetPixel(x, y).R - btm.GetPixel(x + 1, y + 1).R;
+                        int tmp2R = btm.GetPixel(x + 1, y).R - btm.GetPixel(x, y + 1).R;
+                        int answR = Math.Abs(tmp1R) + Math.Abs(tmp2R);
+
+                        int tmp1G = btm.GetPixel(x, y).G - btm.GetPixel(x + 1, y + 1).G;
+                        int tmp2G = btm.GetPixel(x + 1, y).G - btm.GetPixel(x, y + 1).G;
+                        int answG = Math.Abs(tmp1G) + Math.Abs(tmp2G);
+
+                        int tmp1B = btm.GetPixel(x, y).B - btm.GetPixel(x + 1, y + 1).B;
+                        int tmp2B = btm.GetPixel(x + 1, y).B - btm.GetPixel(x, y + 1).B;
+                        int answB = Math.Abs(tmp1B) + Math.Abs(tmp2B);
+
+                        var newColor = System.Drawing.Color.FromArgb(FromInterval(answR), FromInterval(answG), FromInterval(answB));
+                        tempPict.SetPixel(x, y, newColor);
                     }
-                    var newColor = System.Drawing.Color.FromArgb(FromInterval((int)(sumR / dividor)), FromInterval((int)(sumG / dividor)), FromInterval((int)(sumB / dividor)));
-                    tempPict.SetPixel(x, y, newColor);
                 }
             }
             return tempPict;
