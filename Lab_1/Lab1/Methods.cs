@@ -169,7 +169,7 @@ namespace Lab1
             {
                 currSum += VecB[i];
                 D[i] = currSum / totPixes;
-                LUT[i] = ((D[i] - D[0])/(1.0 - D[0])) * (255-1);
+                LUT[i] = ((D[i] - D[0]) / (1.0 - D[0])) * (255 - 1);
             }
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
@@ -183,6 +183,39 @@ namespace Lab1
             return tempPict;
         }
 
+        public static Bitmap LowPass(Bitmap btm, double a)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            double[,] wages = new double[3, 3] { { 1, 1, 1 }, { 1, a, 1 }, { 1, 1, 1 } };
+
+            for (int x = 0; x < btm.Width; x++)
+            {
+                for (int y = 0; y < btm.Height; y++)
+                {
+                    double sumR = 0.0;
+                    double sumG = 0.0;
+                    double sumB = 0.0;
+                    double dividor = 0.0;
+                    for (int x2 = -1; x2 < 2; x2++)
+                    {
+                        for (int y2 = -1; y2 < 2; y2++)
+                        {
+                            if (x + x2 >= 0 && y + y2 >= 0 && x + x2 < btm.Width && y + y2 < btm.Height)
+                            {
+                                double currWage = wages[x2 + 1, y2 + 1];
+                                sumR += btm.GetPixel(x + x2, y + y2).R * currWage;
+                                sumG += btm.GetPixel(x + x2, y + y2).G * currWage;
+                                sumB += btm.GetPixel(x + x2, y + y2).B * currWage;
+                                dividor += currWage;
+                            }
+                        }
+                    }
+                    var newColor = System.Drawing.Color.FromArgb((int)(sumR / dividor), (int)(sumG / dividor), (int)(sumB / dividor));
+                    tempPict.SetPixel(x, y, newColor);
+                }
+            }
+            return tempPict;
+        }
 
         public static Bitmap LocalBin(Bitmap btm, int r)
         {

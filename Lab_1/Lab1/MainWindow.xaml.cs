@@ -30,6 +30,7 @@ namespace Lab1
         public int r;
         public int rG;
         public int hist;
+        public double aLowPas;
         public PointCollection pointsX;
         public PointCollection pointsY;
         public ConcurrentBag<System.Windows.Point> pointsBagX;
@@ -50,6 +51,7 @@ namespace Lab1
             r = 3;
             rG = 3;
             hist = 3;
+            aLowPas = 3;
             pointsX = new PointCollection();
             pointsY = new PointCollection();
             pointsBagX = new ConcurrentBag<System.Windows.Point>();
@@ -164,6 +166,14 @@ namespace Lab1
             await Task.Run(() =>
             {
                 newBmp = Methods.HistEQ(originalBitmap);
+            });
+        }
+
+        public async Task RunLowPass()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.LowPass(originalBitmap, aLowPas);
             });
         }
 
@@ -433,9 +443,27 @@ namespace Lab1
             img.Source = Methods.ToBitmapSource(newBmp);
         }
 
-        private void LowFilter_Button(object sender, RoutedEventArgs e)
+        private async void LowFilter_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            if (double.TryParse(aLowPas_txt.Text, out aLowPas))
+            {
+                if (aLowPas < 0)
+                {
+                    MessageBox.Show("Incorrect 'a' level!");
+                    return;
+                }
+            }
+            await RunLowPass();
 
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
 
         private void HighFilter_Button(object sender, RoutedEventArgs e)
