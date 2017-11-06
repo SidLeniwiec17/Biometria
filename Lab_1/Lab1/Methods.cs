@@ -146,10 +146,10 @@ namespace Lab1
         {
             Bitmap tempPict = new Bitmap(btm);
             tempPict = GrayScale(tempPict);
-            int[] VecB = new int[255];
-            double[] D = new double[255];
-            double[] LUT = new double[255];
-            for (int i = 0; i < 255; i++)
+            int[] VecB = new int[256];
+            double[] D = new double[256];
+            double[] LUT = new double[256];
+            for (int i = 0; i < 256; i++)
             {
                 VecB[i] = 0;
                 D[i] = 0.0;
@@ -165,11 +165,11 @@ namespace Lab1
             }
             double totPixes = btm.Height * btm.Width;
             double currSum = 0;
-            for (int i = 0; i < 255; i++)
+            for (int i = 0; i < 256; i++)
             {
                 currSum += VecB[i];
                 D[i] = currSum / totPixes;
-                LUT[i] = ((D[i] - D[0]) / (1.0 - D[0])) * (255 - 1);
+                LUT[i] = ((D[i] - D[0]) / (1.0 - D[0])) * (256 - 1);
             }
             for (int x = 0; x < tempPict.Size.Width; x++)
             {

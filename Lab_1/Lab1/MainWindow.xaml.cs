@@ -358,17 +358,24 @@ namespace Lab1
 
             if (pointsX.Count > 0 && pointsY.Count > 0)
             {
+                int size = 0;
+                if (2 * newBmp.Height + 100 > SystemParameters.VirtualScreenHeight)
+                {
+                    size = (int)(SystemParameters.VirtualScreenHeight - 150) / 2;
+                }
+                else
+                {
+                    size = newBmp.Height;
+                }
                 borderX.Visibility = Visibility.Visible;
-                borderX.Height = newBmp.Height;
+                borderX.Height = size;
                 polygonX.Points = pointsX;
                 borderX.Header = "X";
                 borderY.Visibility = Visibility.Visible;
-                borderY.Height = newBmp.Height;
+                borderY.Height = size;
                 polygonY.Points = pointsY;
                 borderY.Header = "Y";
-                this.Width = newBmp.Width * 2 + 200;
-                picCol.Width = new GridLength(newBmp.Width);
-                histCol.Width = new GridLength(newBmp.Width);
+                HistCol.Width = new GridLength(1, GridUnitType.Star);
             }
 
             BlakWait.Visibility = Visibility.Collapsed;
@@ -383,12 +390,7 @@ namespace Lab1
             polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0));
             polygonY.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0));
             Brow.Height = GridLength.Auto;
-
-            if (newBmp != null)
-            {
-                this.Width = newBmp.Width + 400;
-                histCol.Width = new GridLength(newBmp.Width);
-            }
+            HistCol.Width = GridLength.Auto;
         }
 
         private async void DoProjection_Button(object sender, RoutedEventArgs e)
@@ -422,23 +424,32 @@ namespace Lab1
 
             if (pointsR.Count > 0 && pointsG.Count > 0 && pointsB.Count > 0)
             {
+                int size = 0;
+                if(3 * newBmp.Height + 100> SystemParameters.VirtualScreenHeight)
+                {
+                    size = (int)(SystemParameters.VirtualScreenHeight - 150) / 3;
+                }
+                else
+                {
+                    size = newBmp.Height;
+                }
                 Brow.Height = Rrow.Height;
                 borderX.Visibility = Visibility.Visible;
-                borderX.Height = newBmp.Height;
+                borderX.Height = size;
                 polygonX.Points = pointsR;
                 borderX.Header = "R";
                 polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0));
                 borderY.Visibility = Visibility.Visible;
-                borderY.Height = newBmp.Height;
+                borderY.Height = size;
                 polygonY.Points = pointsG;
                 polygonY.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 255, 0));
                 borderY.Header = "G";
                 borderZ.Visibility = Visibility.Visible;
-                borderZ.Height = newBmp.Height;
+                borderZ.Height = size;
                 polygonZ.Points = pointsB;
                 polygonZ.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 255));
                 borderZ.Header = "B";
-                this.Width = newBmp.Width + 280 + 400;
+                
             }
 
             BlakWait.Visibility = Visibility.Collapsed;

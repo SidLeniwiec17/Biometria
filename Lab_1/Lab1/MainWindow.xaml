@@ -8,8 +8,8 @@
         Title="MainWindow" Height="550" Width="1050">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Name="picCol" Width="4*"/>
-            <ColumnDefinition Name="histCol" Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Name="HistCol" Width="Auto"/>
             <ColumnDefinition Width="160"/>
             <ColumnDefinition Width="160"/>
         </Grid.ColumnDefinitions>
@@ -36,7 +36,7 @@
             </ScrollViewer>
         </Grid>
 
-        <Grid  Grid.Column= "1">
+        <Grid Grid.Column= "1">
             <Grid.RowDefinitions>
                 <RowDefinition Name="Rrow" Height="*"/>
                 <RowDefinition Height="*"/>
