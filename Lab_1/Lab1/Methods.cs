@@ -109,6 +109,81 @@ namespace Lab1
             return tempPict;
         }
 
+        public static Bitmap HistNorm(Bitmap btm)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            tempPict = GrayScale(tempPict);
+            double min = 255;
+            double max = 0;
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    var pix = tempPict.GetPixel(x, y);
+                    if (pix.R > max)
+                    {
+                        max = pix.R;
+                    }
+                    if (pix.R < min)
+                    {
+                        min = pix.R;
+                    }
+                }
+            }
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    int C = (int)((255.0 / (max - min)) * ((double)tempPict.GetPixel(x, y).R - min));
+                    var newColor = System.Drawing.Color.FromArgb(C, C, C);
+                    tempPict.SetPixel(x, y, newColor);
+                }
+            }
+            return tempPict;
+        }
+
+        public static Bitmap HistEQ(Bitmap btm)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            tempPict = GrayScale(tempPict);
+            int[] VecB = new int[255];
+            double[] D = new double[255];
+            double[] LUT = new double[255];
+            for (int i = 0; i < 255; i++)
+            {
+                VecB[i] = 0;
+                D[i] = 0.0;
+                LUT[i] = 0.0;
+            }
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    var pix = tempPict.GetPixel(x, y);
+                    VecB[pix.B]++;
+                }
+            }
+            double totPixes = btm.Height * btm.Width;
+            double currSum = 0;
+            for (int i = 0; i < 255; i++)
+            {
+                currSum += VecB[i];
+                D[i] = currSum / totPixes;
+                LUT[i] = ((D[i] - D[0])/(1.0 - D[0])) * (255-1);
+            }
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    int C = (int)LUT[tempPict.GetPixel(x, y).R];
+                    var newColor = System.Drawing.Color.FromArgb(C, C, C);
+                    tempPict.SetPixel(x, y, newColor);
+                }
+            }
+            return tempPict;
+        }
+
+
         public static Bitmap LocalBin(Bitmap btm, int r)
         {
             Bitmap pict = new Bitmap(btm);

@@ -151,6 +151,22 @@ namespace Lab1
             });
         }
 
+        public async Task RunHistNorm()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.HistNorm(originalBitmap);
+            });
+        }
+
+        public async Task RunHistEQ()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.HistEQ(originalBitmap);
+            });
+        }
+
         public async Task RunProjection()
         {
             await Task.Run(() =>
@@ -329,7 +345,7 @@ namespace Lab1
             Brow.Height = GridLength.Auto;
             if (newBmp != null)
             {
-                this.Width = newBmp.Width + 220;
+                this.Width = newBmp.Width + 400;
             }
         }
 
@@ -380,11 +396,61 @@ namespace Lab1
                 polygonZ.Points = pointsB;
                 polygonZ.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 255));
                 borderZ.Header = "B";
-                this.Width = newBmp.Width + 280 + 200;
+                this.Width = newBmp.Width + 280 + 400;
             }
 
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
+        private async void NormHist_Button(object sender, RoutedEventArgs e)
+        {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunHistNorm();
+            
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
+        private async void EqHist_Button(object sender, RoutedEventArgs e)
+        {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunHistEQ();
+
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
+        private void LowFilter_Button(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void HighFilter_Button(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GaussFilter_Button(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Edges_Button(object sender, RoutedEventArgs e)
+        {
+
         }
 
     }
