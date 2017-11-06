@@ -199,15 +199,22 @@ namespace Lab1
 
         public static Bitmap Gauss(Bitmap btm, double a)
         {
-            double[,] wages = new double[3, 3] { { 1, a, 1 }, { a, a*a, a }, { 1, a, 1 } };
+            double[,] wages = new double[3, 3] { { 1, a, 1 }, { a, a * a, a }, { 1, a, 1 } };
             Bitmap returned = Pass(btm, a, wages);
+            return returned;
+        }
+
+        public static Bitmap Roberts(Bitmap btm)
+        {
+            double[,] wages = new double[2, 2] { { 1, -1 }, { 0, 0 } };
+            Bitmap returned = EdgeDetection(btm, wages);
             return returned;
         }
 
         public static Bitmap Pass(Bitmap btm, double a, double[,] wages)
         {
             Bitmap tempPict = new Bitmap(btm);
-            
+
             for (int x = 0; x < btm.Width; x++)
             {
                 for (int y = 0; y < btm.Height; y++)
@@ -223,6 +230,39 @@ namespace Lab1
                             if (x + x2 >= 0 && y + y2 >= 0 && x + x2 < btm.Width && y + y2 < btm.Height)
                             {
                                 double currWage = wages[x2 + 1, y2 + 1];
+                                sumR += btm.GetPixel(x + x2, y + y2).R * currWage;
+                                sumG += btm.GetPixel(x + x2, y + y2).G * currWage;
+                                sumB += btm.GetPixel(x + x2, y + y2).B * currWage;
+                                dividor += currWage;
+                            }
+                        }
+                    }
+                    var newColor = System.Drawing.Color.FromArgb(FromInterval((int)(sumR / dividor)), FromInterval((int)(sumG / dividor)), FromInterval((int)(sumB / dividor)));
+                    tempPict.SetPixel(x, y, newColor);
+                }
+            }
+            return tempPict;
+        }
+
+        public static Bitmap EdgeDetection(Bitmap btm, double[,] wages)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+
+            for (int x = 0; x < btm.Width; x++)
+            {
+                for (int y = 0; y < btm.Height; y++)
+                {
+                    double sumR = 0.0;
+                    double sumG = 0.0;
+                    double sumB = 0.0;
+                    double dividor = 0.0;
+                    for (int x2 = 0; x2 < 2; x2++)
+                    {
+                        for (int y2 = 0; y2 < 2; y2++)
+                        {
+                            if (x + x2 >= 0 && y + y2 >= 0 && x + x2 < btm.Width && y + y2 < btm.Height)
+                            {
+                                double currWage = wages[x2, y2];
                                 sumR += btm.GetPixel(x + x2, y + y2).R * currWage;
                                 sumG += btm.GetPixel(x + x2, y + y2).G * currWage;
                                 sumB += btm.GetPixel(x + x2, y + y2).B * currWage;

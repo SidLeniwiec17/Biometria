@@ -197,6 +197,14 @@ namespace Lab1
             });
         }
 
+        public async Task RunRobertsPass()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Roberts(originalBitmap);
+            });
+        }
+
         public async Task RunProjection()
         {
             await Task.Run(() =>
@@ -532,9 +540,19 @@ namespace Lab1
             img.Source = Methods.ToBitmapSource(newBmp);
         }
 
-        private void Edges_Button(object sender, RoutedEventArgs e)
+        private async void Edges_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunRobertsPass();
 
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
 
     }
