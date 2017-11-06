@@ -371,10 +371,10 @@ namespace Lab1
         public static Tuple<Bitmap, PointCollection, PointCollection, PointCollection> Projection(Bitmap btm)
         {
             Bitmap pict = new Bitmap(btm);
-            int[] VecR = new int[255];
-            int[] VecG = new int[255];
-            int[] VecB = new int[255];
-            for (int i = 0; i < 255; i++)
+            int[] VecR = new int[256];
+            int[] VecG = new int[256];
+            int[] VecB = new int[256];
+            for (int i = 0; i < 256; i++)
             {
                 VecR[i] = 0;
                 VecG[i] = 0;

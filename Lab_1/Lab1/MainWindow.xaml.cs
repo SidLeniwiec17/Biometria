@@ -221,7 +221,7 @@ namespace Lab1
                 foreach (var x in answ.Item4)
                     pointsBagB.Add(x);
             });
-        }        
+        }
 
         private async void DoInverse_Button(object sender, RoutedEventArgs e)
         {
@@ -367,6 +367,8 @@ namespace Lab1
                 polygonY.Points = pointsY;
                 borderY.Header = "Y";
                 this.Width = newBmp.Width * 2 + 200;
+                picCol.Width = new GridLength(newBmp.Width);
+                histCol.Width = new GridLength(newBmp.Width);
             }
 
             BlakWait.Visibility = Visibility.Collapsed;
@@ -381,9 +383,11 @@ namespace Lab1
             polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0));
             polygonY.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0));
             Brow.Height = GridLength.Auto;
+
             if (newBmp != null)
             {
                 this.Width = newBmp.Width + 400;
+                histCol.Width = new GridLength(newBmp.Width);
             }
         }
 
@@ -423,7 +427,7 @@ namespace Lab1
                 borderX.Height = newBmp.Height;
                 polygonX.Points = pointsR;
                 borderX.Header = "R";
-                polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255,0,0));
+                polygonX.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0));
                 borderY.Visibility = Visibility.Visible;
                 borderY.Height = newBmp.Height;
                 polygonY.Points = pointsG;
@@ -451,7 +455,7 @@ namespace Lab1
             }
             BlakWait.Visibility = Visibility.Visible;
             await RunHistNorm();
-            
+
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
         }
