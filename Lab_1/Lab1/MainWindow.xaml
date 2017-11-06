@@ -141,8 +141,22 @@
                 <Button Grid.Column="0" Content="Low-Pass Filter" Click="LowFilter_Button" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                 <TextBox x:Name="aLowPas_txt" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="1,1,1,1" TextWrapping="Wrap" Text="3" />
             </Grid>
-            <Button Grid.Row="3" Content="High-Pass Filter" Click="HighFilter_Button" />
-            <Button Grid.Row="4" Content="Gauss Filter" Click="GaussFilter_Button" />
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="High-Pass Filter" Click="HighFilter_Button" />
+                <TextBox x:Name="aHighPas_txt" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="1,1,1,1" TextWrapping="Wrap" Text="3" />
+            </Grid>
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Gauss Filter" Click="GaussFilter_Button" />
+                <TextBox x:Name="aGaussPas_txt" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="1,1,1,1" TextWrapping="Wrap" Text="3" />
+            </Grid>
             <Button Grid.Row="5" Content="Edge Detection" Click="Edges_Button" />
 
         </Grid>

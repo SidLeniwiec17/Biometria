@@ -185,9 +185,29 @@ namespace Lab1
 
         public static Bitmap LowPass(Bitmap btm, double a)
         {
-            Bitmap tempPict = new Bitmap(btm);
             double[,] wages = new double[3, 3] { { 1, 1, 1 }, { 1, a, 1 }, { 1, 1, 1 } };
+            Bitmap returned = Pass(btm, a, wages);
+            return returned;
+        }
 
+        public static Bitmap HighPass(Bitmap btm, double a)
+        {
+            double[,] wages = new double[3, 3] { { 0, -1, 0 }, { -1, a, -1 }, { 0, -1, 0 } };
+            Bitmap returned = Pass(btm, a, wages);
+            return returned;
+        }
+
+        public static Bitmap Gauss(Bitmap btm, double a)
+        {
+            double[,] wages = new double[3, 3] { { 1, a, 1 }, { a, a*a, a }, { 1, a, 1 } };
+            Bitmap returned = Pass(btm, a, wages);
+            return returned;
+        }
+
+        public static Bitmap Pass(Bitmap btm, double a, double[,] wages)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            
             for (int x = 0; x < btm.Width; x++)
             {
                 for (int y = 0; y < btm.Height; y++)
@@ -210,7 +230,7 @@ namespace Lab1
                             }
                         }
                     }
-                    var newColor = System.Drawing.Color.FromArgb((int)(sumR / dividor), (int)(sumG / dividor), (int)(sumB / dividor));
+                    var newColor = System.Drawing.Color.FromArgb(FromInterval((int)(sumR / dividor)), FromInterval((int)(sumG / dividor)), FromInterval((int)(sumB / dividor)));
                     tempPict.SetPixel(x, y, newColor);
                 }
             }

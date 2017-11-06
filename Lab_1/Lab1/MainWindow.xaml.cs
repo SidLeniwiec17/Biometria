@@ -31,6 +31,8 @@ namespace Lab1
         public int rG;
         public int hist;
         public double aLowPas;
+        public double aHighPas;
+        public double aGaussPas;
         public PointCollection pointsX;
         public PointCollection pointsY;
         public ConcurrentBag<System.Windows.Point> pointsBagX;
@@ -52,6 +54,8 @@ namespace Lab1
             rG = 3;
             hist = 3;
             aLowPas = 3;
+            aHighPas = 3;
+            aGaussPas = 3;
             pointsX = new PointCollection();
             pointsY = new PointCollection();
             pointsBagX = new ConcurrentBag<System.Windows.Point>();
@@ -174,6 +178,22 @@ namespace Lab1
             await Task.Run(() =>
             {
                 newBmp = Methods.LowPass(originalBitmap, aLowPas);
+            });
+        }
+
+        public async Task RunHighPass()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.HighPass(originalBitmap, aHighPas);
+            });
+        }
+
+        public async Task RunGaussPass()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Gauss(originalBitmap, aGaussPas);
             });
         }
 
@@ -466,14 +486,50 @@ namespace Lab1
             img.Source = Methods.ToBitmapSource(newBmp);
         }
 
-        private void HighFilter_Button(object sender, RoutedEventArgs e)
+        private async void HighFilter_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            if (double.TryParse(aHighPas_txt.Text, out aHighPas))
+            {
+                if (aHighPas < 0)
+                {
+                    MessageBox.Show("Incorrect 'a' level!");
+                    return;
+                }
+            }
+            await RunHighPass();
 
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
 
-        private void GaussFilter_Button(object sender, RoutedEventArgs e)
+        private async void GaussFilter_Button(object sender, RoutedEventArgs e)
         {
+            HideHistogram();
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            if (double.TryParse(aGaussPas_txt.Text, out aGaussPas))
+            {
+                if (aGaussPas < 0)
+                {
+                    MessageBox.Show("Incorrect 'a' level!");
+                    return;
+                }
+            }
+            await RunGaussPass();
 
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
 
         private void Edges_Button(object sender, RoutedEventArgs e)
