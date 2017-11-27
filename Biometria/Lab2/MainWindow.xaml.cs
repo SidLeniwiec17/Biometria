@@ -79,6 +79,7 @@ namespace Lab2
         private void MaskMode_Button(object sender, RoutedEventArgs e)
         {
             readMaskMode();
+            maskMatrix = Mask.GetMask(maskMode);
         }
 
         private void Erosion_Button(object sender, RoutedEventArgs e)
@@ -86,9 +87,17 @@ namespace Lab2
 
         }
 
-        private void Dilation_Button(object sender, RoutedEventArgs e)
+        private async void Dilation_Button(object sender, RoutedEventArgs e)
         {
-
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunDilation();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
         
         private void Iris_Button(object sender, RoutedEventArgs e)
@@ -127,6 +136,14 @@ namespace Lab2
                        + "7 - right");
                 return;
             }
+        }
+
+        public async Task RunDilation()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Dilation(originalBitmap, maskMatrix);
+            });
         }
     }
 }

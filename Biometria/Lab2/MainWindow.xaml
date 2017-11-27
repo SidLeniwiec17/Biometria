@@ -48,11 +48,28 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="Mask Mode" Click="MaskMode_Button" />
-                <TextBox x:Name="mask" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="1,1,1,1" TextWrapping="Wrap" Text="0" />
+                <Button Grid.Column="0" Content="Mask Mode" Click="MaskMode_Button">
+                    <Button.ToolTip>
+                        <ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold">Mask modes:</TextBlock>
+                                <TextBlock>0 - square<LineBreak/>
+                                1 - cross<LineBreak/>
+                                2 - horizontal<LineBreak/>
+                                3 - vertical<LineBreak/>
+                                4 - top<LineBreak/>
+                                5 - bottom<LineBreak/>
+                                6 - left<LineBreak/>
+                                7 - right<LineBreak/>
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+                <TextBox x:Name="mask" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="1,1,1,1" TextWrapping="Wrap" Text="1" />
             </Grid>
-            <Button Grid.Row="3" Content="Erosion" Grid.Column="0" Click="Erosion_Button" />
-            <Button Grid.Row="4" Content="Dilation" Grid.Column="0" Click="Dilation_Button" />
+            <Button Grid.Row="4" Content="Erosion" Grid.Column="0" Click="Erosion_Button" />
+            <Button Grid.Row="3" Content="Dilation" Grid.Column="0" Click="Dilation_Button" />
             <Button Grid.Row="5" Content="Get iris" Grid.Column="0" Click="Iris_Button" />
             
         </Grid>

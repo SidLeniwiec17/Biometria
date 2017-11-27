@@ -29,7 +29,7 @@ namespace Lab2
             return tempPict;
         }
 
-        public static Tuple<Bitmap,int> GetGreyScaleTreshold(Bitmap btm)
+        public static Tuple<Bitmap, int> GetGreyScaleTreshold(Bitmap btm)
         {
             double treshold = 0;
             double hw = btm.Height * btm.Width;
@@ -50,12 +50,51 @@ namespace Lab2
                 {
                     System.Drawing.Color oldColour, newColor;
                     oldColour = tempPict.GetPixel(x, y);
-                    var value = oldColour.R > treshold ? 255 : 0;
-                    newColor = System.Drawing.Color.FromArgb(value, value, value);
+                    newColor = oldColour.R <= treshold ? System.Drawing.Color.Black : System.Drawing.Color.White;
                     tempPict.SetPixel(x, y, newColor);
                 }
             }
             return new Tuple<Bitmap, int>(tempPict, (int)treshold);
+        }
+
+        public static Bitmap Dilation(Bitmap btm, int[][] mask)
+        {
+            int maskLenght = mask.Length;
+            int maskHalf = (maskLenght - 1) / 2;
+            var binaryBitmap = GetGreyScaleTreshold(btm);
+            Bitmap oriBtm = binaryBitmap.Item1;
+            Bitmap tempPict = new Bitmap(binaryBitmap.Item1);
+            int counter = 0;
+            for (int x = 0; x < oriBtm.Size.Width; x++)
+            {
+                for (int y = 0; y < oriBtm.Size.Height; y++)
+                {
+                    System.Drawing.Color oldColour = oriBtm.GetPixel(x, y);
+                    if ((mask[maskHalf][maskHalf] == 1 && oldColour.R == 0) || (mask[maskHalf][maskHalf] == 0 && oldColour.R == 255))
+                    {
+                        for (int x2 = -maskHalf; x2 < maskHalf; x2++)
+                        {
+                            for (int y2 = -maskHalf; y2 < maskHalf; y2++)
+                            {
+                                if (x + x2 >= 0 && y + y2 >= 0 && x + x2 < oriBtm.Width && y + y2 < oriBtm.Height)
+                                {
+                                    if (mask[x2 + maskHalf][y2 + maskHalf] == 1)
+                                    {
+                                        System.Drawing.Color currCol = tempPict.GetPixel(x + x2, y + y2);
+                                        if(currCol.R != 0)
+                                        {
+                                            counter++;
+                                        }
+                                        tempPict.SetPixel(x + x2, y + y2, System.Drawing.Color.Black);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Console.WriteLine(counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
+            return tempPict;
         }
 
         public static System.Windows.Media.ImageSource ToBitmapSource(Bitmap p_bitmap)
