@@ -59,11 +59,17 @@ namespace Lab2
 
         public static Bitmap Dilation(Bitmap btm, int[][] mask)
         {
-            int maskLenght = mask.Length;
-            int maskHalf = (maskLenght - 1) / 2;
             var binaryBitmap = GetGreyScaleTreshold(btm);
             Bitmap oriBtm = binaryBitmap.Item1;
             Bitmap tempPict = new Bitmap(binaryBitmap.Item1);
+
+            return DoDilation(tempPict, mask);
+        }
+
+        public static Bitmap DoDilation(Bitmap oriBtm, int[][] mask)
+        {
+            int maskHalf = (mask.Length - 1) / 2;
+            Bitmap tempPict = new Bitmap(oriBtm);
             int counter = 0;
             for (int x = 0; x < oriBtm.Size.Width; x++)
             {
@@ -80,8 +86,8 @@ namespace Lab2
                                 {
                                     if (mask[x2 + maskHalf][y2 + maskHalf] == 1)
                                     {
-                                        System.Drawing.Color currCol = tempPict.GetPixel(x + x2, y + y2);
-                                        if(currCol.R != 0)
+                                        System.Drawing.Color currCol = oriBtm.GetPixel(x + x2, y + y2);
+                                        if (currCol.R != 0)
                                         {
                                             counter++;
                                         }
@@ -95,6 +101,77 @@ namespace Lab2
             }
             Console.WriteLine(counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
             return tempPict;
+        }
+
+        public static Bitmap Erosion(Bitmap btm, int[][] mask)
+        {
+            var binaryBitmap = GetGreyScaleTreshold(btm);
+            Bitmap oriBtm = binaryBitmap.Item1;
+            Bitmap tempPict = new Bitmap(binaryBitmap.Item1);
+            
+            return DoErosion(tempPict, mask);
+        } 
+
+        public static Bitmap DoErosion(Bitmap oriBtm, int[][] mask)
+        {
+            int maskHalf = (mask.Length - 1) / 2;
+            Bitmap tempPict = new Bitmap(oriBtm);
+            int counter = 0;
+            for (int x = 0; x < oriBtm.Size.Width; x++)
+            {
+                for (int y = 0; y < oriBtm.Size.Height; y++)
+                {
+                    System.Drawing.Color oldColour = oriBtm.GetPixel(x, y);
+                    if ((mask[maskHalf][maskHalf] == 1 && oldColour.R == 0))
+                    {
+                        bool doesItFit = true;
+                        for (int x2 = -maskHalf; x2 < maskHalf; x2++)
+                        {
+                            for (int y2 = -maskHalf; y2 < maskHalf; y2++)
+                            {
+                                if (x + x2 >= 0 && y + y2 >= 0 && x + x2 < oriBtm.Width && y + y2 < oriBtm.Height)
+                                {
+                                    if (mask[x2 + maskHalf][y2 + maskHalf] == 1)
+                                    {
+                                        System.Drawing.Color currCol = oriBtm.GetPixel(x + x2, y + y2);
+                                        if (currCol.R != 0)
+                                        {
+                                            doesItFit = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!doesItFit)
+                        {
+                            counter++;
+                            tempPict.SetPixel(x, y, System.Drawing.Color.White);
+                        }
+                    }
+                }
+            }
+            Console.WriteLine(counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
+            return tempPict;
+        }
+
+        public static Bitmap Opening(Bitmap btm, int[][] mask)
+        {
+            var binaryBitmap = GetGreyScaleTreshold(btm);
+            Bitmap oriBtm = binaryBitmap.Item1;
+            Bitmap tempPict = new Bitmap(binaryBitmap.Item1);
+
+            tempPict = DoErosion(tempPict, mask);
+            return DoDilation(tempPict, mask);
+        }
+
+        public static Bitmap Closing(Bitmap btm, int[][] mask)
+        {
+            var binaryBitmap = GetGreyScaleTreshold(btm);
+            Bitmap oriBtm = binaryBitmap.Item1;
+            Bitmap tempPict = new Bitmap(binaryBitmap.Item1);
+
+            tempPict = DoDilation(tempPict, mask);
+            return DoErosion(tempPict, mask);
         }
 
         public static System.Windows.Media.ImageSource ToBitmapSource(Bitmap p_bitmap)

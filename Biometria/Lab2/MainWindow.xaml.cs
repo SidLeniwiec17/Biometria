@@ -82,9 +82,17 @@ namespace Lab2
             maskMatrix = Mask.GetMask(maskMode);
         }
 
-        private void Erosion_Button(object sender, RoutedEventArgs e)
+        private async void Erosion_Button(object sender, RoutedEventArgs e)
         {
-
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunErosion();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
 
         private async void Dilation_Button(object sender, RoutedEventArgs e)
@@ -99,7 +107,33 @@ namespace Lab2
             BlakWait.Visibility = Visibility.Collapsed;
             img.Source = Methods.ToBitmapSource(newBmp);
         }
-        
+
+        private async void Opening_Button(object sender, RoutedEventArgs e)
+        {
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunOpening();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
+        private async void Closing_Button(object sender, RoutedEventArgs e)
+        {
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunClosing();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
         private void Iris_Button(object sender, RoutedEventArgs e)
         {
 
@@ -145,5 +179,29 @@ namespace Lab2
                 newBmp = Methods.Dilation(originalBitmap, maskMatrix);
             });
         }
+
+        public async Task RunOpening()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Opening(originalBitmap, maskMatrix);
+            });
+        }
+
+        public async Task RunClosing()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Closing(originalBitmap, maskMatrix);
+            });
+        }
+
+        public async Task RunErosion()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Erosion(originalBitmap, maskMatrix);
+            });
+        }        
     }
 }
