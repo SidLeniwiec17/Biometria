@@ -283,15 +283,15 @@ namespace Lab2
                 {
                     System.Drawing.Color oldColour, newColor;
                     oldColour = tempPict.GetPixel(x, y);
-                    
-                    if(oldColour.R == old.R)
+
+                    if (oldColour.R == old.R)
                     {
                         newColor = System.Drawing.Color.White;
                     }
-                    else 
+                    else
                     {
                         newColor = newCol;
-                    }                   
+                    }
                     tempPict.SetPixel(x, y, newColor);
                 }
             }
@@ -691,6 +691,67 @@ namespace Lab2
 
         }
 
+        public static Tuple<System.Drawing.Point, int> HoughCircle(Bitmap btm)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            int maxR = btm.Height /4;
+            int[,,] A = new int[btm.Width, btm.Height, maxR];
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    for (int r = 0; r < maxR; r++)
+                    {
+                        A[x, y, r] = 0;
+                    }
+                }
+            }
+
+
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    if (btm.GetPixel(x, y).R == System.Drawing.Color.Black.R)
+                    {
+                        for (int r = 0; r < maxR; r++)
+                        {
+                            for (int t = 0; t < 360; t++)
+                            {
+                                var a = (int)(x - (r * Math.Cos(t * Math.PI / 180)));
+                                var b = (int)(y - (r * Math.Sin(t * Math.PI / 180)));
+                                if (a >= 0 && b >= 0 && a < btm.Width && b < btm.Height)
+                                {
+                                    A[a, b, r] += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            int currMax = 0;
+            int curX = 0, curY = 0, curR = 0;
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    for (int r = 0; r < maxR; r++)
+                    {
+                        if (A[x, y, r] > currMax)
+                        {
+                            currMax = A[x, y, r];
+                            curX = x;
+                            curY = y;
+                            curR = r;
+                        }
+                    }
+                }
+            }
+
+            return new Tuple<System.Drawing.Point, int>(new System.Drawing.Point(curX, curY), curR);
+        }
+
         public static Bitmap FindPupil(Bitmap btm, int[][] mask)
         {
             Bitmap tempPict = new Bitmap(btm);
@@ -709,6 +770,17 @@ namespace Lab2
             tempPict = FloodFill(tempPict, new System.Drawing.Point(0, 0), System.Drawing.Color.White, System.Drawing.Color.FromArgb(100, 100, 100));
             tempPict = ChangeColor(tempPict, System.Drawing.Color.FromArgb(100, 100, 100), System.Drawing.Color.Black);
             tempPict = SobelEdgeDetect(tempPict);
+            var Answ = HoughCircle(tempPict);
+
+            try
+            {
+                tempPict.SetPixel(Answ.Item1.X, Answ.Item1.Y, System.Drawing.Color.Red);
+                tempPict.SetPixel(Answ.Item1.X + 1, Answ.Item1.Y, System.Drawing.Color.Red);
+                tempPict.SetPixel(Answ.Item1.X - 1, Answ.Item1.Y, System.Drawing.Color.Red);
+                tempPict.SetPixel(Answ.Item1.X, Answ.Item1.Y + 1, System.Drawing.Color.Red);
+                tempPict.SetPixel(Answ.Item1.X, Answ.Item1.Y - 1, System.Drawing.Color.Red);
+            }
+            catch (Exception ex) { }
             return tempPict;
         }
     }
