@@ -106,7 +106,7 @@ namespace Lab2
                     }
                 }
             }
-            Console.WriteLine(counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
+            Console.WriteLine("DoDilation :" + counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
             return tempPict;
         }
 
@@ -157,8 +157,48 @@ namespace Lab2
                     }
                 }
             }
-            Console.WriteLine(counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
+            Console.WriteLine("DoErosion :" + counter + " / " + oriBtm.Size.Width * oriBtm.Size.Height + " pixels changed");
             return tempPict;
+        }
+
+        public static Tuple<Bitmap,int> DoErosionPupil(Bitmap btm)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            int counter = 0;
+            for (int x = 0; x < btm.Width; x++)
+            {
+                for (int y = 0; y < btm.Height; y++)
+                {
+                    System.Drawing.Color oldColour = btm.GetPixel(x, y);
+                    if (oldColour.R == 0)
+                    {
+                        int neighCounter = 0;
+
+                        for (int x2 = -1; x2 <= 1; x2++)
+                        {
+                            for (int y2 = -1; y2 <= 1; y2++)
+                            {
+                                if (x + x2 >= 0 && x + x2 < btm.Width && y + y2 >= 0 && y + y2 < btm.Height)
+                                {
+                                    var col = btm.GetPixel(x + x2, y + y2);
+                                    if (col.R == 0)
+                                    {
+                                        neighCounter++;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (neighCounter < 3)
+                        {
+                            counter++;
+                            tempPict.SetPixel(x, y, System.Drawing.Color.White);
+                        }
+                    }
+                }
+            }
+            Console.WriteLine("DoErosionPupil: " + counter + " / " + btm.Width * btm.Height + " pixels removed");
+            return new Tuple<Bitmap, int> (tempPict, counter);
         }
 
         public static Bitmap Opening(Bitmap btm, int[][] mask)
@@ -215,6 +255,25 @@ namespace Lab2
 
             return tempPict;
         }
+
+        public static Bitmap RomoveBorder(Bitmap btm)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            for (int x = 0; x < tempPict.Width; x++)
+            {
+                tempPict.SetPixel(x, 0, System.Drawing.Color.White);
+                tempPict.SetPixel(x, tempPict.Height - 1, System.Drawing.Color.White);
+            }
+
+            for (int y = 0; y < tempPict.Height; y++)
+            {
+                tempPict.SetPixel(0, y, System.Drawing.Color.White);
+                tempPict.SetPixel(btm.Width - 1, y, System.Drawing.Color.White);
+            }
+
+            return tempPict;
+        }
+
 
         private static int FromInterval(int col)
         {
@@ -374,7 +433,7 @@ namespace Lab2
             return points;
         }
 
-        public static List<System.Drawing.Point> GetPupilCoords(Bitmap tempPict)
+        /*public static List<System.Drawing.Point> GetPupilCoords(Bitmap tempPict)
         {
             List<System.Drawing.Point> pupilPoints = new List<System.Drawing.Point>();
             Tuple<PointCollection, PointCollection> projection = Projection(tempPict, 0); // X, Y
@@ -401,11 +460,10 @@ namespace Lab2
 
             List<System.Windows.Point> jumps = new List<System.Windows.Point>();
             List<System.Windows.Point> drops = new List<System.Windows.Point>();
-            int[] lastFive = new int[] { 0, 0, 0, 0, 0 };
             bool lastDrop = false;
             for (int i = 0; i < points.Count - 1; i++)
             {
-                lastFive = UpdateLastFive(points[i], lastFive);
+                
                 if (Math.Abs(points[i].Y - points[i + 1].Y) > diff)
                 {
                     if (points[i].Y > points[i + 1].Y)
@@ -460,11 +518,47 @@ namespace Lab2
                 }
             }
             return points;
-        }
+        }*/
 
-        private static int[] UpdateLastFive(System.Windows.Point point, int[] fives)
+        public static Bitmap RemoveSingleNoises(Bitmap btm)
         {
-            return fives;
+            Bitmap tempPict = new Bitmap(btm);
+            int counter = 0;
+            int maskHalf = 1;
+            for (int x = 0; x < btm.Width; x++)
+            {
+                for (int y = 0; y < btm.Height; y++)
+                {
+                    System.Drawing.Color oldColour = btm.GetPixel(x, y);
+                    if (oldColour.R == 0)
+                    {
+                        bool isAlone = true;
+
+                        for (int x2 = -1; x2 <= 1; x2++)
+                        {
+                            for (int y2 = -1; y2 <= 1; y2++)
+                            {
+                                if (x + x2 >= 0 && x + x2 < btm.Width && y + y2 >= 0 && y + y2 < btm.Height)
+                                {
+                                    var col = btm.GetPixel(x + x2, y + y2);
+                                    if (col.R == 0)
+                                    {
+                                        isAlone = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isAlone)
+                        {
+                            tempPict.SetPixel(x, y, System.Drawing.Color.White);
+                        }
+                    }
+                }
+            }
+            Console.WriteLine(counter + " / " + btm.Width * btm.Height + " pixels removed");
+            return tempPict;
         }
 
         public static Bitmap Iris(Bitmap btm, int[][] mask)
@@ -472,7 +566,15 @@ namespace Lab2
             Bitmap tempPict = new Bitmap(btm);
             tempPict = ProjectionNorm(btm);
             tempPict = Erosion(tempPict, mask, 15);
-            List<System.Drawing.Point> points = GetPupilCoords(tempPict);
+            tempPict = RomoveBorder(tempPict);
+            int counter = 1;
+            while (counter > 0)
+            {
+                var pup = DoErosionPupil(tempPict);
+                tempPict = pup.Item1;
+                counter = pup.Item2;
+            }
+            tempPict = Dilation(tempPict, mask);
 
             return tempPict;
         }
