@@ -161,7 +161,7 @@ namespace Lab2
             return tempPict;
         }
 
-        public static Tuple<Bitmap,int> DoErosionPupil(Bitmap btm)
+        public static Tuple<Bitmap, int> DoErosionPupil(Bitmap btm)
         {
             Bitmap tempPict = new Bitmap(btm);
             int counter = 0;
@@ -198,7 +198,7 @@ namespace Lab2
                 }
             }
             Console.WriteLine("DoErosionPupil: " + counter + " / " + btm.Width * btm.Height + " pixels removed");
-            return new Tuple<Bitmap, int> (tempPict, counter);
+            return new Tuple<Bitmap, int>(tempPict, counter);
         }
 
         public static Bitmap Opening(Bitmap btm, int[][] mask)
@@ -274,6 +274,30 @@ namespace Lab2
             return tempPict;
         }
 
+        public static Bitmap ChangeColor(Bitmap btm, System.Drawing.Color old, System.Drawing.Color newCol)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    System.Drawing.Color oldColour, newColor;
+                    oldColour = tempPict.GetPixel(x, y);
+                    
+                    if(oldColour.R == old.R)
+                    {
+                        newColor = System.Drawing.Color.White;
+                    }
+                    else 
+                    {
+                        newColor = newCol;
+                    }                   
+                    tempPict.SetPixel(x, y, newColor);
+                }
+            }
+
+            return tempPict;
+        }
 
         private static int FromInterval(int col)
         {
@@ -561,7 +585,113 @@ namespace Lab2
             return tempPict;
         }
 
+        private static Bitmap FloodFill(Bitmap bmp, System.Drawing.Point pt, System.Drawing.Color targetColor, System.Drawing.Color replacementColor)
+        {
+            Stack<System.Drawing.Point> pixels = new Stack<System.Drawing.Point>();
+            Bitmap tempPict = new Bitmap(bmp);
+            pixels.Push(pt);
+
+            while (pixels.Count > 0)
+            {
+                System.Drawing.Point a = pixels.Pop();
+                if (a.X < tempPict.Width && a.X >= 0 &&
+                        a.Y < tempPict.Height && a.Y >= 0)//make sure we stay within bounds
+                {
+
+                    if (tempPict.GetPixel(a.X, a.Y).R == targetColor.R)
+                    {
+                        tempPict.SetPixel(a.X, a.Y, replacementColor);
+                        pixels.Push(new System.Drawing.Point(a.X - 1, a.Y));
+                        pixels.Push(new System.Drawing.Point(a.X + 1, a.Y));
+                        pixels.Push(new System.Drawing.Point(a.X, a.Y - 1));
+                        pixels.Push(new System.Drawing.Point(a.X, a.Y + 1));
+                    }
+                }
+            }
+            return tempPict;
+        }
+
         public static Bitmap Iris(Bitmap btm, int[][] mask)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            tempPict = FindPupil(btm, mask);
+            return tempPict;
+        }
+
+        public static Bitmap SobelEdgeDetect(Bitmap original)
+        {
+            Bitmap b = original;
+            Bitmap bb = original;
+            int width = b.Width;
+            int height = b.Height;
+            int[,] gx = new int[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+            int[,] gy = new int[,] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+
+            int[,] allPixR = new int[width, height];
+            int[,] allPixG = new int[width, height];
+            int[,] allPixB = new int[width, height];
+
+            int limit = 128 * 128;
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    allPixR[i, j] = b.GetPixel(i, j).R;
+                    allPixG[i, j] = b.GetPixel(i, j).G;
+                    allPixB[i, j] = b.GetPixel(i, j).B;
+                }
+            }
+
+            int new_rx = 0, new_ry = 0;
+            int new_gx = 0, new_gy = 0;
+            int new_bx = 0, new_by = 0;
+            int rc, gc, bc;
+            for (int i = 1; i < b.Width - 1; i++)
+            {
+                for (int j = 1; j < b.Height - 1; j++)
+                {
+
+                    new_rx = 0;
+                    new_ry = 0;
+                    new_gx = 0;
+                    new_gy = 0;
+                    new_bx = 0;
+                    new_by = 0;
+                    rc = 0;
+                    gc = 0;
+                    bc = 0;
+
+                    for (int wi = -1; wi < 2; wi++)
+                    {
+                        for (int hw = -1; hw < 2; hw++)
+                        {
+                            rc = allPixR[i + hw, j + wi];
+                            new_rx += gx[wi + 1, hw + 1] * rc;
+                            new_ry += gy[wi + 1, hw + 1] * rc;
+
+                            gc = allPixG[i + hw, j + wi];
+                            new_gx += gx[wi + 1, hw + 1] * gc;
+                            new_gy += gy[wi + 1, hw + 1] * gc;
+
+                            bc = allPixB[i + hw, j + wi];
+                            new_bx += gx[wi + 1, hw + 1] * bc;
+                            new_by += gy[wi + 1, hw + 1] * bc;
+                        }
+                    }
+                    if (new_rx * new_rx + new_ry * new_ry > limit || new_gx * new_gx + new_gy * new_gy > limit || new_bx * new_bx + new_by * new_by > limit)
+                        bb.SetPixel(i, j, System.Drawing.Color.Black);
+
+                    //bb.SetPixel (i, j, Color.FromArgb(allPixR[i,j],allPixG[i,j],allPixB[i,j]));
+                    else
+                        bb.SetPixel(i, j, System.Drawing.Color.White);
+                }
+            }
+            return bb;
+
+        }
+
+        public static Bitmap FindPupil(Bitmap btm, int[][] mask)
         {
             Bitmap tempPict = new Bitmap(btm);
             tempPict = ProjectionNorm(btm);
@@ -575,7 +705,10 @@ namespace Lab2
                 counter = pup.Item2;
             }
             tempPict = Dilation(tempPict, mask);
-
+            tempPict = RomoveBorder(tempPict);
+            tempPict = FloodFill(tempPict, new System.Drawing.Point(0, 0), System.Drawing.Color.White, System.Drawing.Color.FromArgb(100, 100, 100));
+            tempPict = ChangeColor(tempPict, System.Drawing.Color.FromArgb(100, 100, 100), System.Drawing.Color.Black);
+            tempPict = SobelEdgeDetect(tempPict);
             return tempPict;
         }
     }
