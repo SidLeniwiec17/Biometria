@@ -134,9 +134,17 @@ namespace Lab2
             img.Source = Methods.ToBitmapSource(newBmp);
         }
 
-        private void Iris_Button(object sender, RoutedEventArgs e)
+        private async void Iris_Button(object sender, RoutedEventArgs e)
         {
-
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunIris();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
         }
 
         private void readMaskMode()
@@ -193,6 +201,14 @@ namespace Lab2
             await Task.Run(() =>
             {
                 newBmp = Methods.Closing(originalBitmap, maskMatrix);
+            });
+        }
+
+        public async Task RunIris()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.Iris(originalBitmap, maskMatrix);
             });
         }
 

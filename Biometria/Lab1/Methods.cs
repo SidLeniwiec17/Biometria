@@ -14,7 +14,6 @@ namespace Lab1
     {
         public static Bitmap GrayScale(Bitmap btm)
         {
-
             Bitmap tempPict = new Bitmap(btm);
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
@@ -33,7 +32,6 @@ namespace Lab1
 
         public static Bitmap Inverse(Bitmap btm)
         {
-
             Bitmap tempPict = new Bitmap(btm);
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
@@ -51,7 +49,6 @@ namespace Lab1
 
         public static Bitmap DarkBright(Bitmap btm, int darkBright)
         {
-
             Bitmap tempPict = new Bitmap(btm);
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
