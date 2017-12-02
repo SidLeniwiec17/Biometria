@@ -30,7 +30,7 @@ namespace Lab2
             return tempPict;
         }
 
-        public static Tuple<Bitmap, int> GetGreyScaleTreshold(Bitmap btm, int tresh = -1)
+        public static Tuple<Bitmap, int> GetGreyScaleTreshold(Bitmap btm, float scale = 1.0f)
         {
             double treshold = 0;
             double hw = btm.Height * btm.Width;
@@ -47,17 +47,16 @@ namespace Lab2
                     treshold += (double)(value / hw);
                 }
             }
-            if (tresh != -1)
-            {
-                treshold = (double)tresh;
-            }
+            treshold += 5;
+            treshold = (double) treshold * scale;
+            
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
                 for (int y = 0; y < tempPict.Size.Height; y++)
                 {
                     System.Drawing.Color oldColour, newColor;
                     oldColour = tempPict.GetPixel(x, y);
-                    newColor = oldColour.R >= treshold ? System.Drawing.Color.White : System.Drawing.Color.Black;
+                    newColor = oldColour.R >= (int)treshold ? System.Drawing.Color.White : System.Drawing.Color.Black;
                     tempPict.SetPixel(x, y, newColor);
                 }
             }
@@ -110,9 +109,9 @@ namespace Lab2
             return tempPict;
         }
 
-        public static Bitmap Erosion(Bitmap btm, int[][] mask, int tresh = -1)
+        public static Bitmap Erosion(Bitmap btm, int[][] mask, float scale = 1.0f)
         {
-            var binaryBitmap = GetGreyScaleTreshold(btm, tresh);
+            var binaryBitmap = GetGreyScaleTreshold(btm, scale);
             Bitmap oriBtm = binaryBitmap.Item1;
             Bitmap tempPict = new Bitmap(binaryBitmap.Item1);
 
@@ -457,98 +456,10 @@ namespace Lab2
             return points;
         }
 
-        /*public static List<System.Drawing.Point> GetPupilCoords(Bitmap tempPict)
-        {
-            List<System.Drawing.Point> pupilPoints = new List<System.Drawing.Point>();
-            Tuple<PointCollection, PointCollection> projection = Projection(tempPict, 0); // X, Y
-            PointCollection projectionX = GetDropsInProjection(projection.Item1);
-            PointCollection projectionY = GetDropsInProjection(projection.Item2);
-            return pupilPoints;
-        }
-
-        public static PointCollection GetDropsInProjection(PointCollection points)
-        {
-            double max = 0;
-            double totalBlack = 0;
-            foreach (var p in points)
-            {
-                totalBlack += p.Y;
-                if (p.Y > max)
-                {
-                    max = p.Y;
-                }
-            }
-            double mean = totalBlack / points.Count;
-            //int diff = ((int)(max - mean)) > (int)mean ? ((int)(max - mean)) : (int)mean;
-            int diff = (int)mean;
-
-            List<System.Windows.Point> jumps = new List<System.Windows.Point>();
-            List<System.Windows.Point> drops = new List<System.Windows.Point>();
-            bool lastDrop = false;
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                
-                if (Math.Abs(points[i].Y - points[i + 1].Y) > diff)
-                {
-                    if (points[i].Y > points[i + 1].Y)
-                    {
-                        lastDrop = true;
-                        break;
-                    }
-                    else
-                    {
-                        lastDrop = false;
-                        break;
-                    }
-                }
-            }
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                if (Math.Abs(points[i].Y - points[i + 1].Y) > diff)
-                {
-                    if (points[i].Y > points[i + 1].Y && !lastDrop)
-                    {
-                        drops.Add(points[i + 1]);
-                        lastDrop = true;
-                    }
-                    else if (lastDrop)
-                    {
-                        jumps.Add(points[i]);
-                        lastDrop = false;
-                    }
-                }
-            }
-            if (jumps.Count > 0 && drops.Count > 0)
-            {
-                bool isJumpFirst = jumps[0].X > drops[0].X ? true : false;
-                int jumpIndx = 0;
-                int dropIndx = 0;
-
-                for (int i = 0; i < points.Count; i++)
-                {
-                    if (i < jumps[jumpIndx].X && isJumpFirst)
-                    {
-                        points[i] = new System.Windows.Point(i, 0);
-                    }
-                    else if (i == jumps[jumpIndx].X && isJumpFirst)
-                    {
-                        jumpIndx++;
-                        isJumpFirst = false;
-                    }
-                    else if (i == drops[dropIndx].X && !isJumpFirst)
-                    {
-                        isJumpFirst = true;
-                    }
-                }
-            }
-            return points;
-        }*/
-
         public static Bitmap RemoveSingleNoises(Bitmap btm)
         {
             Bitmap tempPict = new Bitmap(btm);
             int counter = 0;
-            int maskHalf = 1;
             for (int x = 0; x < btm.Width; x++)
             {
                 for (int y = 0; y < btm.Height; y++)
@@ -585,26 +496,56 @@ namespace Lab2
             return tempPict;
         }
 
-        private static Bitmap FloodFill(Bitmap bmp, System.Drawing.Point pt, System.Drawing.Color targetColor, System.Drawing.Color replacementColor)
+        private static Bitmap FloodFill(Bitmap bmp, System.Drawing.Point pt, List<System.Drawing.Color> targetColors, System.Drawing.Color replacementColor, Tuple<System.Drawing.Point, int> pupil = null)
         {
+            List<Stack<System.Drawing.Point>> stackList = new List<Stack<System.Drawing.Point>>();
             Stack<System.Drawing.Point> pixels = new Stack<System.Drawing.Point>();
             Bitmap tempPict = new Bitmap(bmp);
             pixels.Push(pt);
+            stackList.Add(pixels);
+            int lB = 0;
+            int rB = tempPict.Width;
+            int uB = tempPict.Height;
+            int bB = 0;
 
-            while (pixels.Count > 0)
+            if(pupil != null)
             {
-                System.Drawing.Point a = pixels.Pop();
-                if (a.X < tempPict.Width && a.X >= 0 &&
-                        a.Y < tempPict.Height && a.Y >= 0)//make sure we stay within bounds
+                lB = pupil.Item1.X - pupil.Item2;
+                rB = pupil.Item1.X + pupil.Item2;
+                uB = pupil.Item1.Y + pupil.Item2;
+                bB = pupil.Item1.Y - pupil.Item2;
+            }
+            int stackIndex = 0;
+            while (stackList[stackIndex].Count > 0)
+            {
+                System.Drawing.Point a = stackList[stackIndex].Pop();
+                if (stackList[stackIndex].Count > 30000)
                 {
+                    stackIndex++;
+                    stackList.Add(new Stack<System.Drawing.Point>());
+                }
+                else if(stackList[stackIndex].Count == 0 && stackIndex > 0)
+                {
+                    stackList.RemoveAt(stackIndex);
+                    stackIndex--;
+                }
 
-                    if (tempPict.GetPixel(a.X, a.Y).R == targetColor.R)
+                if (a.X < rB && a.X >= lB &&
+                        a.Y < uB && a.Y >= bB)//make sure we stay within bounds
+                {
+                    bool isPushed = false;
+                    foreach (var c in targetColors)
                     {
-                        tempPict.SetPixel(a.X, a.Y, replacementColor);
-                        pixels.Push(new System.Drawing.Point(a.X - 1, a.Y));
-                        pixels.Push(new System.Drawing.Point(a.X + 1, a.Y));
-                        pixels.Push(new System.Drawing.Point(a.X, a.Y - 1));
-                        pixels.Push(new System.Drawing.Point(a.X, a.Y + 1));
+                        if (!isPushed && tempPict.GetPixel(a.X, a.Y).R == c.R)
+                        {
+                            tempPict.SetPixel(a.X, a.Y, replacementColor);
+                            stackList[stackIndex].Push(new System.Drawing.Point(a.X - 1, a.Y));
+                            stackList[stackIndex].Push(new System.Drawing.Point(a.X + 1, a.Y));
+                            stackList[stackIndex].Push(new System.Drawing.Point(a.X, a.Y - 1));
+                            stackList[stackIndex].Push(new System.Drawing.Point(a.X, a.Y + 1));
+                            isPushed = true;
+                            
+                        }
                     }
                 }
             }
@@ -614,7 +555,8 @@ namespace Lab2
         public static Bitmap Iris(Bitmap btm, int[][] mask)
         {
             Bitmap tempPict = new Bitmap(btm);
-            tempPict = FindPupil(btm, mask);
+            var pupilCords = FindPupil(btm, mask);
+            tempPict = FindIris(btm, mask, pupilCords);
             return tempPict;
         }
 
@@ -692,15 +634,17 @@ namespace Lab2
         }
 
         public static Tuple<System.Drawing.Point, int> HoughCircle(Bitmap btm)
+        //public static Bitmap HoughCircle(Bitmap btm)
         {
             Bitmap tempPict = new Bitmap(btm);
-            int maxR = btm.Height /4;
-            int[,,] A = new int[btm.Width, btm.Height, maxR];
-            for (int x = 0; x < tempPict.Size.Width; x++)
+            int minR = btm.Height / 10;
+            int maxR = btm.Height / 2;
+            int[,,] A = new int[btm.Width, btm.Height, maxR - minR];
+            for (int x = 0; x < tempPict.Width; x++)
             {
-                for (int y = 0; y < tempPict.Size.Height; y++)
+                for (int y = 0; y < tempPict.Height; y++)
                 {
-                    for (int r = 0; r < maxR; r++)
+                    for (int r = 0; r < maxR - minR; r++)
                     {
                         A[x, y, r] = 0;
                     }
@@ -708,18 +652,18 @@ namespace Lab2
             }
 
 
-            for (int x = 0; x < tempPict.Size.Width; x++)
+            for (int x = 0; x < tempPict.Width; x++)
             {
-                for (int y = 0; y < tempPict.Size.Height; y++)
+                for (int y = 0; y < tempPict.Height; y++)
                 {
                     if (btm.GetPixel(x, y).R == System.Drawing.Color.Black.R)
                     {
-                        for (int r = 0; r < maxR; r++)
+                        for (int r = 0; r < maxR - minR; r++)
                         {
                             for (int t = 0; t < 360; t++)
                             {
-                                var a = (int)(x - (r * Math.Cos(t * Math.PI / 180)));
-                                var b = (int)(y - (r * Math.Sin(t * Math.PI / 180)));
+                                var a = (int)(x - ((r + minR) * Math.Cos(t * Math.PI / 180)));
+                                var b = (int)(y - ((r + minR) * Math.Sin(t * Math.PI / 180)));
                                 if (a >= 0 && b >= 0 && a < btm.Width && b < btm.Height)
                                 {
                                     A[a, b, r] += 1;
@@ -736,7 +680,7 @@ namespace Lab2
             {
                 for (int y = 0; y < tempPict.Size.Height; y++)
                 {
-                    for (int r = 0; r < maxR; r++)
+                    for (int r = 0; r < maxR - minR; r++)
                     {
                         if (A[x, y, r] > currMax)
                         {
@@ -748,15 +692,79 @@ namespace Lab2
                     }
                 }
             }
+            List<int> xs = new List<int>();
+            List<int> ys = new List<int>();
+            List<int> rs = new List<int>();
 
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    for (int r = 0; r < maxR - minR; r++)
+                    {
+                        if (A[x, y, r] >= (int)(0.8 * currMax))
+                        {
+                            xs.Add(x);
+                            ys.Add(y);
+                            rs.Add(r);
+                        }
+                    }
+                }
+            }
+            int maxFoundR = 0;
+            for (int i = 0; i < rs.Count; i++)
+            {
+                if (rs[i] > maxFoundR)
+                {
+                    maxFoundR = rs[i];
+                    curX = xs[i];
+                    curY = ys[i];
+                    curR = rs[i] + minR - 5;
+                }
+            }
+
+            //Bitmap tmpBitmap = DrawAllFoundCircles(btm, new List<int> { curX }, new List<int> { curY }, new List<int> { curR });
             return new Tuple<System.Drawing.Point, int>(new System.Drawing.Point(curX, curY), curR);
+            //return tmpBitmap;
         }
 
-        public static Bitmap FindPupil(Bitmap btm, int[][] mask)
+        public static Bitmap DrawAllFoundCircles(Bitmap btm, List<int> xs, List<int> ys, List<int> rs)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            for (int i = 0; i < xs.Count; i++)
+            {
+                try
+                {
+                    tempPict.SetPixel(xs[i], ys[i], System.Drawing.Color.Red);
+                    tempPict.SetPixel(xs[i] + 1, ys[i], System.Drawing.Color.Red);
+                    tempPict.SetPixel(xs[i] - 1, ys[i], System.Drawing.Color.Red);
+                    tempPict.SetPixel(xs[i], ys[i] + 1, System.Drawing.Color.Red);
+                    tempPict.SetPixel(xs[i], ys[i] - 1, System.Drawing.Color.Red);
+
+                    for (int t = 0; t < 360; t++)
+                    {
+                        var a = (int)(xs[i] - (rs[i] * Math.Cos(t * Math.PI / 180)));
+                        var b = (int)(ys[i] - (rs[i] * Math.Sin(t * Math.PI / 180)));
+                        if (a >= 0 && b >= 0 && a < btm.Width && b < btm.Height)
+                        {
+                            try
+                            {
+                                tempPict.SetPixel(a, b, System.Drawing.Color.Blue);
+                            }
+                            catch (Exception e) { };
+                        }
+                    }
+                }
+                catch (Exception ex) { }
+            }
+            return tempPict;
+        }
+
+        public static Tuple<System.Drawing.Point, int> FindPupil(Bitmap btm, int[][] mask)
         {
             Bitmap tempPict = new Bitmap(btm);
             tempPict = ProjectionNorm(btm);
-            tempPict = Erosion(tempPict, mask, 15);
+            tempPict = Erosion(tempPict, mask, 0.1f);
             tempPict = RomoveBorder(tempPict);
             int counter = 1;
             while (counter > 0)
@@ -767,20 +775,73 @@ namespace Lab2
             }
             tempPict = Dilation(tempPict, mask);
             tempPict = RomoveBorder(tempPict);
-            tempPict = FloodFill(tempPict, new System.Drawing.Point(0, 0), System.Drawing.Color.White, System.Drawing.Color.FromArgb(100, 100, 100));
+            tempPict = FloodFill(tempPict, new System.Drawing.Point(0, 0), new List<System.Drawing.Color> { System.Drawing.Color.White }, System.Drawing.Color.FromArgb(100, 100, 100));
             tempPict = ChangeColor(tempPict, System.Drawing.Color.FromArgb(100, 100, 100), System.Drawing.Color.Black);
             tempPict = SobelEdgeDetect(tempPict);
-            var Answ = HoughCircle(tempPict);
+            var PupilCoords = HoughCircle(tempPict);
 
+            return PupilCoords;
+        }
+
+        public static Bitmap FindIris(Bitmap btm, int[][] mask, Tuple<System.Drawing.Point, int> pupil)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            tempPict = ProjectionNorm(btm);
+            tempPict = Erosion(tempPict, mask, 1.3f);
+            tempPict = RomoveBorder(tempPict);
+            int counter = 1;
+            while (counter > 0)
+            {
+                var pup = DoErosionPupil(tempPict);
+                tempPict = pup.Item1;
+                counter = pup.Item2;
+            }
+            tempPict = Dilation(tempPict, mask);
+            tempPict = RomoveBorder(tempPict);
+            tempPict = CutOffPupil(tempPict, pupil);
+            /*tempPict = FloodFill(tempPict, new System.Drawing.Point(0, 0), System.Drawing.Color.White, System.Drawing.Color.FromArgb(100, 100, 100));
+            tempPict = ChangeColor(tempPict, System.Drawing.Color.FromArgb(100, 100, 100), System.Drawing.Color.Black);
+            tempPict = SobelEdgeDetect(tempPict);
+            var PupilCoords = HoughCircle(tempPict);
+            */
+            return tempPict;
+        }
+
+        private static Bitmap CutOffPupil(Bitmap btm, Tuple<System.Drawing.Point, int> pupil)
+        {
+            Bitmap tempPict = new Bitmap(btm);
             try
             {
-                tempPict.SetPixel(Answ.Item1.X, Answ.Item1.Y, System.Drawing.Color.Red);
-                tempPict.SetPixel(Answ.Item1.X + 1, Answ.Item1.Y, System.Drawing.Color.Red);
-                tempPict.SetPixel(Answ.Item1.X - 1, Answ.Item1.Y, System.Drawing.Color.Red);
-                tempPict.SetPixel(Answ.Item1.X, Answ.Item1.Y + 1, System.Drawing.Color.Red);
-                tempPict.SetPixel(Answ.Item1.X, Answ.Item1.Y - 1, System.Drawing.Color.Red);
+                for (int t = 0; t < 360; t++)
+                {
+                    var a = (int)(pupil.Item1.X - (pupil.Item2 * Math.Cos(t * Math.PI / 180)));
+                    var b = (int)(pupil.Item1.Y - (pupil.Item2 * Math.Sin(t * Math.PI / 180)));
+                    
+                    if (a >= 0 && b >= 0 && a < btm.Width && b < btm.Height)
+                    {
+                        try
+                        {
+                            tempPict.SetPixel(a, b, System.Drawing.Color.Yellow);
+                            tempPict.SetPixel(a-1, b, System.Drawing.Color.Yellow);
+                            tempPict.SetPixel(a+1, b, System.Drawing.Color.Yellow);
+                            tempPict.SetPixel(a, b-1, System.Drawing.Color.Yellow);
+                            tempPict.SetPixel(a, b+1, System.Drawing.Color.Yellow);
+                        }
+                        catch (Exception e) { }
+                    }
+                }
             }
             catch (Exception ex) { }
+            List<System.Drawing.Color> colorToChange = new List<System.Drawing.Color>()
+            {
+                System.Drawing.Color.White, System.Drawing.Color.Black
+            };
+            tempPict = FloodFill(tempPict, pupil.Item1, colorToChange, System.Drawing.Color.Blue, pupil);
+            colorToChange = new List<System.Drawing.Color>()
+            {
+                System.Drawing.Color.Blue
+            };
+            tempPict = FloodFill(tempPict, pupil.Item1, colorToChange, System.Drawing.Color.White);
             return tempPict;
         }
     }
