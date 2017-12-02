@@ -728,6 +728,102 @@ namespace Lab2
             //return tmpBitmap;
         }
 
+        //public static Tuple<System.Drawing.Point, int> HoughCircle(Bitmap btm)
+        public static Bitmap HoughCircle2(Bitmap btm, int minRpup)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+            int minR = minRpup + 5;
+            int maxR = (btm.Height / 2) + 5;
+            int[,,] A = new int[btm.Width, btm.Height, maxR - minR];
+            for (int x = 0; x < tempPict.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Height; y++)
+                {
+                    for (int r = 0; r < maxR - minR; r++)
+                    {
+                        A[x, y, r] = 0;
+                    }
+                }
+            }
+
+
+            for (int x = 0; x < tempPict.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Height; y++)
+                {
+                    if (btm.GetPixel(x, y).R == System.Drawing.Color.Black.R)
+                    {
+                        for (int r = 0; r < maxR - minR; r++)
+                        {
+                            for (int t = 0; t < 360; t++)
+                            {
+                                var a = (int)(x - ((r + minR) * Math.Cos(t * Math.PI / 180)));
+                                var b = (int)(y - ((r + minR) * Math.Sin(t * Math.PI / 180)));
+                                if (a >= 0 && b >= 0 && a < btm.Width && b < btm.Height)
+                                {
+                                    A[a, b, r] += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            int currMax = 0;
+            int curX = 0, curY = 0, curR = 0;
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    for (int r = 0; r < maxR - minR; r++)
+                    {
+                        if (A[x, y, r] > currMax)
+                        {
+                            currMax = A[x, y, r];
+                            curX = x;
+                            curY = y;
+                            curR = r;
+                        }
+                    }
+                }
+            }
+            List<int> xs = new List<int>();
+            List<int> ys = new List<int>();
+            List<int> rs = new List<int>();
+
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    for (int r = 0; r < maxR - minR; r++)
+                    {
+                        if (A[x, y, r] >= (int)(0.8 * currMax))
+                        {
+                            xs.Add(x);
+                            ys.Add(y);
+                            rs.Add(r);
+                        }
+                    }
+                }
+            }
+            int maxFoundR = 0;
+            for (int i = 0; i < rs.Count; i++)
+            {
+                if (rs[i] > maxFoundR)
+                {
+                    maxFoundR = rs[i];
+                    curX = xs[i];
+                    curY = ys[i];
+                    curR = rs[i] + minR - 5;
+                }
+            }
+
+            //Bitmap tmpBitmap = DrawAllFoundCircles(btm, new List<int> { curX }, new List<int> { curY }, new List<int> { curR });
+            Bitmap tmpBitmap = DrawAllFoundCircles(btm, xs, ys, rs);
+            //return new Tuple<System.Drawing.Point, int>(new System.Drawing.Point(curX, curY), curR);
+            return tmpBitmap;
+        }
+
         public static Bitmap DrawAllFoundCircles(Bitmap btm, List<int> xs, List<int> ys, List<int> rs)
         {
             Bitmap tempPict = new Bitmap(btm);
@@ -799,6 +895,8 @@ namespace Lab2
             tempPict = Dilation(tempPict, mask);
             tempPict = RomoveBorder(tempPict);
             tempPict = CutOffPupil(tempPict, pupil);
+            tempPict = SobelEdgeDetect(tempPict);
+            tempPict = HoughCircle2(tempPict, pupil.Item2);
             /*tempPict = FloodFill(tempPict, new System.Drawing.Point(0, 0), System.Drawing.Color.White, System.Drawing.Color.FromArgb(100, 100, 100));
             tempPict = ChangeColor(tempPict, System.Drawing.Color.FromArgb(100, 100, 100), System.Drawing.Color.Black);
             tempPict = SobelEdgeDetect(tempPict);
