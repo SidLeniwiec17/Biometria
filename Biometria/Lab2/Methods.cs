@@ -856,8 +856,29 @@ namespace Lab2
             tempPict = RomoveBorder(tempPict);
             tempPict = DoErosionPupil(tempPict).Item1;
             var irisCoords = HoughCircle(tempPict, pupil.Item1, pupil.Item2 + (int)(0.2* pupil.Item2), true);
-            tempPict = DrawAllFoundCircles(tempPict, new List<int> { pupil.Item1.X }, new List<int> { pupil.Item1.Y }, new List<int> { pupil.Item2 });
-            tempPict = DrawAllFoundCircles(tempPict, new List<int> { irisCoords.Item1.X }, new List<int> { irisCoords.Item1.Y }, new List<int> { irisCoords.Item2 });
+            //tempPict = DrawAllFoundCircles(tempPict, new List<int> { pupil.Item1.X }, new List<int> { pupil.Item1.Y }, new List<int> { pupil.Item2 });
+            //tempPict = DrawAllFoundCircles(tempPict, new List<int> { irisCoords.Item1.X }, new List<int> { irisCoords.Item1.Y }, new List<int> { irisCoords.Item2 });
+
+            tempPict = Finalize(btm, pupil, irisCoords);
+
+            return tempPict;
+        }
+
+        private static Bitmap Finalize(Bitmap btm, Tuple<System.Drawing.Point, int> pupil, Tuple<System.Drawing.Point, int> iris)
+        {
+            Bitmap tempPict = new Bitmap(btm);
+
+            for(int x = 0; x < btm.Width; x++)
+            {
+                for (int y = 0; y < btm.Height; y++)
+                {
+                    if(IsInsideCircle(pupil, x, y) || !IsInsideCircle(iris, x, y))
+                    {
+                        tempPict.SetPixel(x, y, System.Drawing.Color.White);
+                    }
+                }
+            }
+
             return tempPict;
         }
 
@@ -897,6 +918,12 @@ namespace Lab2
             };
             tempPict = FloodFill(tempPict, pupil.Item1, colorToChange, System.Drawing.Color.White);
             return tempPict;
+        }
+
+        private static bool IsInsideCircle(Tuple<System.Drawing.Point, int> circle, int x, int y)
+        {
+            var dist = Math.Sqrt(((circle.Item1.X - x) * (circle.Item1.X - x)) + ((circle.Item1.Y - y) * (circle.Item1.Y - y)));
+            return dist <= circle.Item2;
         }
     }
 }
