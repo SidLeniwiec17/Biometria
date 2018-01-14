@@ -63,20 +63,33 @@ namespace Lab3
             img.Source = Methods.ToBitmapSource(newBmp);
         }
 
+        private async void KMM_Button(object sender, RoutedEventArgs e)
+        {
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunKMM();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
         public async Task RunPreprocessing()
         {
             await Task.Run(() =>
             {
-                newBmp = Methods.Contrast(originalBitmap, 2.0f);
-                newBmp = Methods.Opening(newBmp, maskMatrix);
-                int counter = 1;
-                while (counter > 0)
-                {
-                    var pup = Methods.DoErosionPupil(newBmp);
-                    newBmp = pup.Item1;
-                    counter = pup.Item2;
-                }
+                newBmp = Methods.DoPreprocessingThings(originalBitmap, maskMatrix);
+            });
+        }
 
+        public async Task RunKMM()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.DoPreprocessingThings(originalBitmap, maskMatrix);
+                newBmp = Methods.KMM(newBmp);
             });
         }
     }
