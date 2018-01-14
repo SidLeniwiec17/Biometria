@@ -258,22 +258,26 @@ namespace Lab3
             int[][] map = new int[tempPict.Size.Width][];
 
             bool isFinished = false;
+            int pixelsRemoved = 0;
+
+
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                map[x] = new int[tempPict.Size.Height];
+            }
+
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    System.Drawing.Color oldColour = tempPict.GetPixel(x, y);
+                    map[x][y] = oldColour.R == Color.Black.R ? 1 : 0;
+                }
+            }
 
             while (isFinished == false)
             {
-                for (int x = 0; x < tempPict.Size.Width; x++)
-                {
-                    map[x] = new int[tempPict.Size.Height];
-                }
-
-                for (int x = 0; x < tempPict.Size.Width; x++)
-                {
-                    for (int y = 0; y < tempPict.Size.Height; y++)
-                    {
-                        System.Drawing.Color oldColour = tempPict.GetPixel(x, y);
-                        map[x][y] = oldColour.R == Color.Black.R ? 1 : 0;
-                    }
-                }
+                pixelsRemoved = 0;
 
                 for (int x = 1; x < tempPict.Size.Width - 1; x++)
                 {
@@ -285,6 +289,7 @@ namespace Lab3
                         }
                     }
                 }
+
 
                 for (int x = 1; x < tempPict.Size.Width - 1; x++)
                 {
@@ -316,6 +321,7 @@ namespace Lab3
                         if (map[x][y] == 4)
                         {
                             map[x][y] = 0;
+                            pixelsRemoved++;
                         }
                     }
                 }
@@ -334,6 +340,7 @@ namespace Lab3
                                 if (DoDeletePixel(GetMask(map, x, y)))
                                 {
                                     map[x][y] = 0;
+                                    pixelsRemoved++;
                                 }
                                 else
                                 {
@@ -352,8 +359,13 @@ namespace Lab3
                     }
 
                 }
-                 
-                isFinished = IsOnePixWidh(map);
+
+                Console.WriteLine("Pixels removed : " + pixelsRemoved);
+                if (pixelsRemoved == 0)
+                {
+                    isFinished = true;
+                }
+                //isFinished = IsOnePixWidh(map);
             }
 
             for (int x = 0; x < tempPict.Size.Width; x++)
@@ -464,7 +476,7 @@ namespace Lab3
                     if (neigh[i] != 0 && prev == true)
                     {
                         counter++;
-                        if(counter > 4)
+                        if (counter > 4)
                         {
                             return false;
                         }
@@ -472,7 +484,7 @@ namespace Lab3
                     else if (neigh[i] == 0 && prev == true)
                     {
                         prev = false;
-                        if(counter >= 2 && counter <= 4)
+                        if (counter >= 2 && counter <= 4)
                         {
                             return true;
                         }
