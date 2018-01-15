@@ -76,6 +76,19 @@ namespace Lab3
             img.Source = Methods.ToBitmapSource(newBmp);
         }
 
+        private async void K3M_Button(object sender, RoutedEventArgs e)
+        {
+            if (newBmp == null)
+            {
+                MessageBox.Show("Load image!");
+                return;
+            }
+            BlakWait.Visibility = Visibility.Visible;
+            await RunK3M();
+            BlakWait.Visibility = Visibility.Collapsed;
+            img.Source = Methods.ToBitmapSource(newBmp);
+        }
+
         public async Task RunPreprocessing()
         {
             await Task.Run(() =>
@@ -90,6 +103,15 @@ namespace Lab3
             {
                 newBmp = Methods.DoPreprocessingThings(originalBitmap, maskMatrix);
                 newBmp = Methods.KMM(newBmp);
+            });
+        }
+
+        public async Task RunK3M()
+        {
+            await Task.Run(() =>
+            {
+                newBmp = Methods.DoPreprocessingThings(originalBitmap, maskMatrix);
+                newBmp = Methods.K3M(newBmp);
             });
         }
     }

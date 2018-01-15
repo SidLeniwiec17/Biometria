@@ -260,7 +260,6 @@ namespace Lab3
             bool isFinished = false;
             int pixelsRemoved = 0;
 
-
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
                 map[x] = new int[tempPict.Size.Height];
@@ -275,6 +274,7 @@ namespace Lab3
                 }
             }
 
+
             while (isFinished == false)
             {
                 pixelsRemoved = 0;
@@ -283,7 +283,7 @@ namespace Lab3
                 {
                     for (int y = 1; y < tempPict.Size.Height - 1; y++)
                     {
-                        if (map[x][y] != 0 && IsEdgePixel(GetMask(map, x, y)))
+                        if (map[x][y] >= 1 && IsEdgePixel(GetMask(map, x, y)))
                         {
                             map[x][y] = 2;
                         }
@@ -295,7 +295,7 @@ namespace Lab3
                 {
                     for (int y = 1; y < tempPict.Size.Height - 1; y++)
                     {
-                        if (map[x][y] != 0 && IsCornerPixel(GetMask(map, x, y)))
+                        if (map[x][y] >= 1 && IsCornerPixel(GetMask(map, x, y)))
                         {
                             map[x][y] = 3;
                         }
@@ -307,7 +307,7 @@ namespace Lab3
                 {
                     for (int y = 1; y < tempPict.Size.Height - 1; y++)
                     {
-                        if (map[x][y] != 0 && HasPixelAdjacentNeighbours(GetMask(map, x, y)))
+                        if (map[x][y] >= 1 && HasPixelAdjacentNeighbours(GetMask(map, x, y)))
                         {
                             map[x][y] = 4;
                         }
@@ -339,7 +339,7 @@ namespace Lab3
                             {
                                 if (DoDeletePixel(GetMask(map, x, y)))
                                 {
-                                    map[x][y] = 0;
+                                    map[x][y] = 8;
                                     pixelsRemoved++;
                                 }
                                 else
@@ -357,8 +357,18 @@ namespace Lab3
                     {
                         N = 3;
                     }
-
+                    for (int x = 0; x < tempPict.Size.Width; x++)
+                    {
+                        for (int y = 0; y < tempPict.Size.Height; y++)
+                        {
+                            if (map[x][y] == 8)
+                            {
+                                map[x][y] = 0;
+                            }
+                        }
+                    }
                 }
+                
 
                 Console.WriteLine("Pixels removed : " + pixelsRemoved);
                 if (pixelsRemoved == 0)
@@ -366,8 +376,8 @@ namespace Lab3
                     isFinished = true;
                 }
                 //isFinished = IsOnePixWidh(map);
-            }
 
+            }
             for (int x = 0; x < tempPict.Size.Width; x++)
             {
                 for (int y = 0; y < tempPict.Size.Height; y++)
@@ -422,20 +432,10 @@ namespace Lab3
 
         public static bool IsCornerPixel(int[][] mask)
         {
-            if (mask[1][1] != 0)
+            if (mask[1][1] >= 1)
             {
-                int whitesCounter = 0;
-                for (int x = 0; x < 3; x++)
-                {
-                    for (int y = 0; y < 3; y++)
-                    {
-                        if (mask[x][y] == 0)
-                        {
-                            whitesCounter++;
-                        }
-                    }
-                }
-                if (whitesCounter == 1 && (mask[0][0] == 0 || mask[2][0] == 0 || mask[0][2] == 0 || mask[2][2] == 0))
+                if ((mask[1][0] >= 1 && mask[2][1] >= 1 && mask[1][2] >= 1 && mask[0][1] >= 1)
+                    && (mask[0][0] == 0 || mask[2][0] == 0 || mask[0][2] == 0 || mask[2][2] == 0))
                 {
                     return true;
                 }
@@ -461,45 +461,113 @@ namespace Lab3
             return tempPict;
         }
 
+        //public static bool HasPixelAdjacentNeighbours(int[][] mask)
+        //{
+        //    if (mask[1][1] != 0)
+        //    {
+        //        int[] neigh = new int[] {
+        //            mask[0][0] , mask[1][0], mask[2][0], mask[2][1],
+        //            mask[2][2], mask[1][2], mask[0][2], mask[0][1]
+        //        };
+        //        int counter = 0;
+        //        bool prev = false;
+        //        for (int i = 0; i < neigh.Length; i++)
+        //        {
+        //            if (neigh[i] != 0 && prev == true)
+        //            {
+        //                counter++;
+        //                if (counter > 4)
+        //                {
+        //                    return false;
+        //                }
+        //            }
+        //            else if (neigh[i] == 0 && prev == true)
+        //            {
+        //                prev = false;
+        //                if (counter >= 2 && counter <= 4)
+        //                {
+        //                    return true;
+        //                }
+        //                counter = 0;
+        //            }
+        //            else if (neigh[i] != 0 && prev == false)
+        //            {
+        //                counter = 1;
+        //                prev = true;
+        //            }
+        //        }
+        //        if (counter >= 2 && counter <= 4)
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
+
+        //public static bool HasPixelAdjacentNeighbours(int[][] mask)
+        //{
+        //    if (mask[1][1] != 0)
+        //    {
+        //        int[] neigh = new int[] {
+        //            mask[0][0] , mask[1][0], mask[2][0], mask[2][1],
+        //            mask[2][2], mask[1][2], mask[0][2], mask[0][1]
+        //        };
+        //        int counter = 0;
+        //        bool prev = false;
+        //        bool run = true;
+        //        bool secRun = false;
+        //        int i = 0;
+        //        while (run)
+        //        {
+        //            if (neigh[i] != 0 && prev == true)
+        //            {
+        //                counter++;
+        //                if (counter > 4)
+        //                {
+        //                    return false;
+        //                }
+        //            }
+        //            else if (neigh[i] == 0 && prev == true)
+        //            {
+        //                prev = false;
+        //                if (counter >= 2 && counter <= 4)
+        //                {
+        //                    return true;
+        //                }
+        //                counter = 0;
+        //            }
+        //            else if (neigh[i] != 0 && prev == false)
+        //            {
+        //                counter = 1;
+        //                prev = true;
+        //            }
+        //            i++;
+        //            if (i >= neigh.Length)
+        //            {
+        //                i = 0;
+        //                if (!secRun)
+        //                {
+        //                    secRun = true;
+        //                }
+        //                else
+        //                {
+        //                    run = false;
+        //                }
+        //            }
+        //        }
+        //        if (counter >= 2 && counter <= 4)
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
+
         public static bool HasPixelAdjacentNeighbours(int[][] mask)
         {
             if (mask[1][1] != 0)
             {
-                int[] neigh = new int[] {
-                    mask[0][0] , mask[1][0], mask[2][0], mask[2][1],
-                    mask[2][2], mask[1][2], mask[0][2], mask[0][1]
-                };
-                int counter = 0;
-                bool prev = false;
-                for (int i = 0; i < neigh.Length; i++)
-                {
-                    if (neigh[i] != 0 && prev == true)
-                    {
-                        counter++;
-                        if (counter > 4)
-                        {
-                            return false;
-                        }
-                    }
-                    else if (neigh[i] == 0 && prev == true)
-                    {
-                        prev = false;
-                        if (counter >= 2 && counter <= 4)
-                        {
-                            return true;
-                        }
-                        counter = 0;
-                    }
-                    else if (neigh[i] != 0 && prev == false)
-                    {
-                        counter = 1;
-                        prev = true;
-                    }
-                }
-                if (counter >= 2 && counter <= 4)
-                {
-                    return true;
-                }
+                return isWeightProper(mask, K3Mhelper.A234);
             }
             return false;
         }
@@ -507,19 +575,15 @@ namespace Lab3
         public static int CalculatePixelWeight(int[][] mask)
         {
             int[][] wages = new int[3][];
-            wages[0] = new int[] { 128, 1, 2 };
-            wages[1] = new int[] { 64, 0, 4 };
-            wages[2] = new int[] { 32, 16, 8 };
+            wages[0] = new int[] { 128, 64, 32 };
+            wages[1] = new int[] { 1, 0, 16 };
+            wages[2] = new int[] { 2, 4, 8 };
             int sum = 0;
             for (int x = 0; x < 3; x++)
             {
                 for (int y = 0; y < 3; y++)
                 {
-                    if (x == 1 && y == 1)
-                    {
-                        break;
-                    }
-                    else if (mask[x][y] != 0)
+                    if (mask[x][y] != 0)
                     {
                         sum += wages[x][y];
                     }
@@ -530,25 +594,166 @@ namespace Lab3
 
         public static bool DoDeletePixel(int[][] mask)
         {
-            int[] deletionTable = new int[]{3,5,7,12,13,14,15,20,21,22,23,28,29,30,
-                31,48,52,53,54,55,56,60,61,62,63,65,67,69,71,77,79,80,81,83,84,85,
-                86,87,88,89,91,92,93,94,95,97,99,101,103,109,111,112,113,115,116,
-                117,118,119,120,121,123,124,125,126,127,131,133,135,141,143,149,
-                151,157,159,181,183,189,191,192,193,195,197,199,205,207,208,209,
-                211,212,213,214,215,216,217,219,220,221,222,223,224,225,227,229,
-                231,237,239,240,241,243,244,245,246,247,248,249,251,252,253,254,255
-            };
             int sum = CalculatePixelWeight(mask);
 
-            for (int i = 0; i < deletionTable.Length; i++)
+            for (int i = 0; i < K3Mhelper.deletionTable.Length; i++)
             {
-                if (sum == deletionTable[i])
+                if (sum == K3Mhelper.deletionTable[i])
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public static bool isWeightProper(int[][] mask, int[] Table)
+        {
+            int sum = CalculatePixelWeight(mask);
+
+            for (int i = 0; i < Table.Length; i++)
+            {
+                if (sum == Table[i])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static Bitmap K3M(Bitmap originalBitmap)
+        {
+            Bitmap tempPict = new Bitmap(originalBitmap);
+            int[][] map = new int[tempPict.Size.Width][];
+
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                map[x] = new int[tempPict.Size.Height];
+            }
+
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    System.Drawing.Color oldColour = tempPict.GetPixel(x, y);
+                    map[x][y] = oldColour.R == Color.Black.R ? 1 : 0;
+                }
+            }
+
+            bool doWeStop = false;
+            int counter = 0;
+            while (doWeStop == false)
+            {
+                counter = 0;
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] != 0 && isWeightProper(GetMask(map, x, y), K3Mhelper.A0))
+                        {
+                            map[x][y] = 2;
+                        }
+                    }
+                }
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] == 2 && isWeightProper(GetMask(map, x, y), K3Mhelper.A1))
+                        {
+                            map[x][y] = 0;
+                            counter++;
+                        }
+                    }
+                }
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] == 2 && isWeightProper(GetMask(map, x, y), K3Mhelper.A2))
+                        {
+                            map[x][y] = 0;
+                            counter++;
+                        }
+                    }
+                }
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] == 2 && isWeightProper(GetMask(map, x, y), K3Mhelper.A3))
+                        {
+                            map[x][y] = 0;
+                            counter++;
+                        }
+                    }
+                }
+
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] == 2 && isWeightProper(GetMask(map, x, y), K3Mhelper.A4))
+                        {
+                            map[x][y] = 0;
+                            counter++;
+                        }
+                    }
+                }
+
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] == 2 && isWeightProper(GetMask(map, x, y), K3Mhelper.A5))
+                        {
+                            map[x][y] = 0;
+                            counter++;
+                        }
+                    }
+                }
+                for (int x = 1; x < tempPict.Size.Width - 1; x++)
+                {
+                    for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                    {
+                        if (map[x][y] == 2)
+                        {
+                            map[x][y] = 1;
+                        }
+                    }
+                }
+                Console.WriteLine("Pixels removed : " + counter);
+                if (counter == 0)
+                {
+                    doWeStop = true;
+                }
+            }
+            //1pix phase
+            counter = 0;
+            for (int x = 1; x < tempPict.Size.Width - 1; x++)
+            {
+                for (int y = 1; y < tempPict.Size.Height - 1; y++)
+                {
+                    if (map[x][y] != 0)
+                    {
+                        if (map[x][y] != 0 && isWeightProper(GetMask(map, x, y), K3Mhelper.Apixel))
+                        {
+                            map[x][y] = 0;
+                            counter++;
+                        }
+                    }
+                }
+            }
+            Console.WriteLine("last phaze pixels removed : " + counter);
+            for (int x = 0; x < tempPict.Size.Width; x++)
+            {
+                for (int y = 0; y < tempPict.Size.Height; y++)
+                {
+                    Color color = map[x][y] == 0 ? System.Drawing.Color.White : System.Drawing.Color.Black;
+                    tempPict.SetPixel(x, y, color);
+                }
+            }
+            return tempPict;
         }
     }
 }
