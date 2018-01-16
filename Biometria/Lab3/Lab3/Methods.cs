@@ -274,7 +274,6 @@ namespace Lab3
                 }
             }
 
-
             while (isFinished == false)
             {
                 pixelsRemoved = 0;
